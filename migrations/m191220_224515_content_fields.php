@@ -21,6 +21,7 @@ class m191220_224515_content_fields extends Migration
         $this->createTable('{{%content_fields}}', [
             'id' => $this->primaryKey(),
 
+            'label' => $this->string(45)->notNull(),
             'name' => $this->string(45)->notNull(),
             'type' => $this->tinyInteger(1)->notNull()->defaultValue(1), // 1 - string, 2 - text, 3 - html
             'sort_order' => $this->integer(2)->notNull()->defaultValue(10), // sort order range

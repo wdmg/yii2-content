@@ -3,12 +3,15 @@
 namespace wdmg\content\models;
 
 use Yii;
+use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\SluggableBehavior;
 use wdmg\content\models\Fields;
+use wdmg\content\models\Items;
+use wdmg\content\models\Content;
 use yii\helpers\Json;
 
 /**
@@ -32,7 +35,7 @@ class Blocks extends ActiveRecord
     const CONTENT_BLOCK_TYPE_LIST = 2;
 
     const CONTENT_BLOCK_STATUS_DRAFT = 0;
-    const CONTENT_BLOCK_STATUS_PUBLISHED = 1;
+    const CONTENT_BLOCK_STATUS_PUBLISHED = 10;
 
     /**
      * {@inheritdoc}
@@ -64,7 +67,7 @@ class Blocks extends ActiveRecord
                 'skipOnEmpty' => true,
                 'immutable' => true,
                 'value' => function ($event) {
-                    return mb_substr($this->title, 0, 64);
+                    return mb_substr($this->title, 0, 45);
                 }
             ],
             'blameable' =>  [
@@ -91,7 +94,7 @@ class Blocks extends ActiveRecord
             [['type'], 'integer'],
             [['status'], 'boolean'],
             ['alias', 'unique', 'message' => Yii::t('app/modules/content', 'Alias attribute must be unique.')],
-            ['alias', 'match', 'pattern' => '/^[A-Za-z0-9\-\_]+$/', 'message' => Yii::t('app/modules/pages','It allowed only Latin alphabet, numbers and the «-», «_» characters.')],
+            ['alias', 'match', 'pattern' => '/^[A-Za-z0-9\-\_]+$/', 'message' => Yii::t('app/modules/content','It allowed only Latin alphabet, numbers and the «-», «_» characters.')],
             [['created_at', 'updated_at'], 'safe'],
         ];
 
@@ -150,14 +153,152 @@ class Blocks extends ActiveRecord
     /**
      * @return array or null
      */
-    public function getFields($fields = null)
+    public function getFields($field_id = null, $asArray = true)
     {
 
-        if (is_array($fields)) {
-            return Fields::find()->where(['id' => $fields])->asArray()->all();
+        if ($field_id) {
+            if ($asArray)
+                return Fields::find()->where(['id' => $field_id])->asArray()->all();
+            else
+                return Fields::find()->where(['id' => $field_id])->all();
         } else {
             return null;
         }
+    }
+
+    /**
+     * @return array or null
+     */
+    public function getItems($block_id = null, $asArray = true)
+    {
+
+        if ($block_id && $this->type == self::CONTENT_BLOCK_TYPE_LIST) {
+            if ($asArray)
+                return Items::find()->where(['block_id' => $block_id])->asArray()->all();
+            else
+                return Items::find()->where(['block_id' => $block_id])->all();
+        } elseif ($this->type == self::CONTENT_BLOCK_TYPE_LIST) {
+            if ($asArray)
+                return Items::find()->where(['block_id' => $this->id])->asArray()->all();
+            else
+                return Items::find()->where(['block_id' => $this->id])->all();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @return array or null
+     */
+    public function getContent($ext_id = null, $block_id = null, $asArray = true)
+    {
+
+        if ($ext_id) {
+            if ($block_id) {
+                if ($asArray)
+                    return Content::find()->where(['id' => $ext_id, 'block_id' => $block_id])->asArray()->all();
+                else
+                    return Content::find()->where(['id' => $ext_id, 'block_id' => $block_id])->all();
+            } else {
+                if ($asArray)
+                    return Content::find()->where(['id' => $ext_id, 'block_id' => $this->id])->asArray()->all();
+                else
+                    return Content::find()->where(['id' => $ext_id, 'block_id' => $this->id])->all();
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     *
+     *
+     * SELECT `fields`.`sort_order` AS `order`, `fields`.`name`, `content`.`content`, `fields`.`type`, `fields`.`params`
+     * FROM `btf_content` `content`
+     * LEFT JOIN `btf_content_blocks` `blocks` ON `blocks`.`id` = `content`.`block_id`
+     * LEFT JOIN `btf_content_fields` `fields` ON `fields`.`id` = `content`.`field_id`
+     * WHERE (`blocks`.`id`=__BLOCK_ID__) AND ((`blocks`.`type`=__BLOCK_TYPE__) AND (`blocks`.`status`=__BLOCK_STATUS__))
+     * GROUP BY `content`.`content` ORDER BY `fields`.`sort_order`;
+     *
+     * @param integer $id
+     * @param string $alias
+     * @return ActiveQuery, array or null
+     */
+    public static function getBlockContent($id = null, $alias = null, $asArray = false) {
+
+        $query = Content::find()->alias('content')
+            ->select(['fields.sort_order as field_order', 'fields.name', 'content.content', 'fields.type', 'fields.params'])
+            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id`')
+            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id`');
+
+        if ($id)
+            $query->where([
+                'blocks.id' => intval($id)
+            ]);
+        elseif ($alias)
+            $query->where([
+                'blocks.alias' => trim($alias)
+            ]);
+
+        $query->andWhere([
+            'blocks.type' => self::CONTENT_BLOCK_TYPE_ONCE,
+            'blocks.status' => self::CONTENT_BLOCK_STATUS_PUBLISHED
+        ]);
+
+        $query->groupBy(['content.content'])->orderBy(['fields.sort_order' => 'ASC']);
+
+        if ($asArray)
+            return $query->asArray()->all();
+        else
+            return $query->all();
+    }
+
+    /**
+     *
+     *
+     * SELECT `items`.`row_order` AS `id`, `fields`.`sort_order` AS `order`, `fields`.`name`, `content`.`content`, `fields`.`type`, `fields`.`params`
+     * FROM `btf_content` `content`
+     * LEFT JOIN `btf_content_blocks` `blocks` ON `blocks`.`id` = `content`.`block_id`
+     * LEFT JOIN `btf_content_fields` `fields` ON `fields`.`id` = `content`.`field_id`
+     * LEFT JOIN `btf_content_items` `items` ON `items`.`block_id` = `blocks`.`id` AND `items`.`ext_id` = `content`.`id`
+     * WHERE (`blocks`.`id`=__BLOCK_ID__) AND ((`blocks`.`type`=__BLOCK_TYPE__) AND (`blocks`.`status`=__BLOCK_STATUS__))
+     * GROUP BY `content`.`content`
+     * ORDER BY `items`.`row_order`, `fields`.`sort_order`;
+     *
+     * @param integer $id
+     * @param string $alias
+     * @return ActiveQuery, array or null
+     */
+    public static function getListContent($id = null, $alias = null, $asArray = false) {
+        $query = Content::find()->alias('content')
+            ->select(['items.row_order', 'fields.sort_order as field_order', 'fields.name', 'content.content', 'fields.type', 'fields.params'])
+            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id`')
+            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id`')
+            ->leftJoin(['items' => Items::tableName()], '`items`.`block_id` = `blocks`.`id` AND `items`.`ext_id` = `content`.`id`');
+
+        if ($id)
+            $query->where([
+                'blocks.id' => intval($id)
+            ]);
+        elseif ($alias)
+            $query->where([
+                'blocks.alias' => trim($alias)
+            ]);
+
+        $query->andWhere([
+            'blocks.type' => self::CONTENT_BLOCK_TYPE_LIST,
+            'blocks.status' => self::CONTENT_BLOCK_STATUS_PUBLISHED
+        ]);
+
+        $query->groupBy(['content.content'])->orderBy(['items.row_order' => 'ASC', 'fields.sort_order' => 'ASC']);
+
+        if ($asArray)
+            $output = $query->asArray()->all();
+        else
+            $output =  $query->all();
+
+        return $output;
+
     }
 
     /**
@@ -180,5 +321,37 @@ class Blocks extends ActiveRecord
             return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'updated_by']);
         else
             return null;
+    }
+
+    /**
+     * @return array of list
+     */
+    public function getStatusesList($allStatuses = false)
+    {
+        if ($allStatuses)
+            $list[] = [
+                '*' => Yii::t('app/modules/content', 'All statuses')
+            ];
+
+        $list[] = [
+            self::CONTENT_BLOCK_STATUS_DRAFT => Yii::t('app/modules/content', 'Draft'),
+            self::CONTENT_BLOCK_STATUS_PUBLISHED => Yii::t('app/modules/content', 'Published')
+        ];
+
+        return $list;
+    }
+
+    /**
+     * Finds the Newsletters model based on its primary key value.
+     * If the model is not found, a 404 HTTP exception will be thrown.
+     * @param integer $id
+     * @return ActiveRecord model or null
+     */
+    public static function findModel($id)
+    {
+        if (($model = self::findOne($id)) !== null)
+            return $model;
+
+        return null;
     }
 }

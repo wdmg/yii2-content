@@ -66,7 +66,7 @@ class Content extends ActiveRecord
             [['created_at', 'updated_at'], 'safe'],
         ];
 
-        if (class_exists('\wdmg\users\models\Users') && isset(Yii::$app->modules['users'])) {
+        if (class_exists('\wdmg\users\models\Users') && (Yii::$app->hasModule('admin/users') || Yii::$app->hasModule('users'))) {
             $rules[] = [['created_by', 'updated_by'], 'required'];
         }
 
