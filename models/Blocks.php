@@ -211,33 +211,27 @@ class Blocks extends ActiveRecord
 
 
     /**
-     *
-     *
-     * SELECT `fields`.`sort_order` AS `order`, `fields`.`name`, `content`.`content`, `fields`.`type`, `fields`.`params`
-     * FROM `btf_content` `content`
-     * LEFT JOIN `btf_content_blocks` `blocks` ON `blocks`.`id` = `content`.`block_id`
-     * LEFT JOIN `btf_content_fields` `fields` ON `fields`.`id` = `content`.`field_id`
-     * WHERE (`blocks`.`id`=__BLOCK_ID__) AND ((`blocks`.`type`=__BLOCK_TYPE__) AND (`blocks`.`status`=__BLOCK_STATUS__))
-     * GROUP BY `content`.`content` ORDER BY `fields`.`sort_order`;
-     *
-     * @param integer $id
-     * @param string $alias
-     * @return ActiveQuery, array or null
+     * @param null $id
+     * @param bool $asArray
+     * @return array|null|ActiveRecord
      */
-    public static function getBlockContent($id = null, $alias = null, $asArray = false) {
+    public static function getBlockContent($id = null, $asArray = false) {
+
+        if (!is_integer($id) && !is_string($id))
+            return null;
 
         $query = Content::find()->alias('content')
             ->select(['fields.sort_order as field_order', 'fields.name', 'content.content', 'fields.type', 'fields.params'])
             ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id`')
             ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id`');
 
-        if ($id)
+        if (is_integer($id))
             $query->where([
                 'blocks.id' => intval($id)
             ]);
-        elseif ($alias)
+        elseif (is_string($id))
             $query->where([
-                'blocks.alias' => trim($alias)
+                'blocks.alias' => trim($id)
             ]);
 
         $query->andWhere([
@@ -254,35 +248,28 @@ class Blocks extends ActiveRecord
     }
 
     /**
-     *
-     *
-     * SELECT `items`.`row_order` AS `id`, `fields`.`sort_order` AS `order`, `fields`.`name`, `content`.`content`, `fields`.`type`, `fields`.`params`
-     * FROM `btf_content` `content`
-     * LEFT JOIN `btf_content_blocks` `blocks` ON `blocks`.`id` = `content`.`block_id`
-     * LEFT JOIN `btf_content_fields` `fields` ON `fields`.`id` = `content`.`field_id`
-     * LEFT JOIN `btf_content_items` `items` ON `items`.`block_id` = `blocks`.`id` AND `items`.`ext_id` = `content`.`id`
-     * WHERE (`blocks`.`id`=__BLOCK_ID__) AND ((`blocks`.`type`=__BLOCK_TYPE__) AND (`blocks`.`status`=__BLOCK_STATUS__))
-     * GROUP BY `content`.`content`
-     * ORDER BY `items`.`row_order`, `fields`.`sort_order`;
-     *
-     * @param integer $id
-     * @param string $alias
-     * @return ActiveQuery, array or null
+     * @param null $id
+     * @param bool $asArray
+     * @return array|null|ActiveRecord
      */
-    public static function getListContent($id = null, $alias = null, $asArray = false) {
+    public static function getListContent($id = null, $asArray = false) {
+
+        if (!is_integer($id) && !is_string($id))
+            return null;
+
         $query = Content::find()->alias('content')
             ->select(['items.row_order', 'fields.sort_order as field_order', 'fields.name', 'content.content', 'fields.type', 'fields.params'])
             ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id`')
             ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id`')
             ->leftJoin(['items' => Items::tableName()], '`items`.`block_id` = `blocks`.`id` AND `items`.`ext_id` = `content`.`id`');
 
-        if ($id)
+        if (is_integer($id))
             $query->where([
                 'blocks.id' => intval($id)
             ]);
-        elseif ($alias)
+        elseif (is_string($id))
             $query->where([
-                'blocks.alias' => trim($alias)
+                'blocks.alias' => trim($id)
             ]);
 
         $query->andWhere([
@@ -293,11 +280,9 @@ class Blocks extends ActiveRecord
         $query->groupBy(['content.content'])->orderBy(['items.row_order' => 'ASC', 'fields.sort_order' => 'ASC']);
 
         if ($asArray)
-            $output = $query->asArray()->all();
+            return $query->asArray()->all();
         else
-            $output =  $query->all();
-
-        return $output;
+            return  $query->all();
 
     }
 
@@ -343,14 +328,19 @@ class Blocks extends ActiveRecord
 
     /**
      * Finds the Newsletters model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
+     * If the model is not found, null will be returned.
+     * @param integer/string $id_or_alias
      * @return ActiveRecord model or null
      */
     public static function findModel($id)
     {
-        if (($model = self::findOne($id)) !== null)
-            return $model;
+        if (is_integer($id)) {
+            if (($model = self::findOne(['id' => intval($id)])) !== null)
+                return $model;
+        } else if (is_string($id)) {
+            if (($model = self::findOne(['alias' => trim($id)])) !== null)
+                return $model;
+        }
 
         return null;
     }

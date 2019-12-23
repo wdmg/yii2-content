@@ -74,7 +74,7 @@ class ListsController extends Controller
     public function actionView($id)
     {
         $model = self::findModel($id);
-        $rows = $model->getListContent($model->id, null, true);
+        $rows = $model->getListContent($model->id, true);
         $data = ArrayHelper::map($rows, 'name', 'content', 'row_order');
         $data = array_values($data);
         $dataProvider = new ArrayDataProvider([

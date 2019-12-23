@@ -75,9 +75,7 @@ class BlocksController extends Controller
     public function actionView($id)
     {
         $model = self::findModel($id);
-        $rows = $model->getBlockContent($model->id, null, true);
-        //$data = ArrayHelper::map($rows, 'name', 'content', 'row_order');
-        //$data = array_values($data);
+        $rows = $model->getBlockContent($model->id, true);
         $dataProvider = new \yii\data\ArrayDataProvider([
             'allModels' => $rows,
             'pagination' => [

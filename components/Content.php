@@ -26,15 +26,18 @@ class Content extends Component
     /**
      *
      */
-    public function getContent($id = null)
+    public function get($id = null)
     {
+        if (is_null($id))
+            return null;
+
         if ($model = Blocks::findModel($id)) {
             if ($model->type == Blocks::CONTENT_BLOCK_TYPE_LIST) {
-                $rows = $model->getListContent($model->id, null, true);
+                $rows = $model->getListContent($model->id, true);
                 $data = ArrayHelper::map($rows, 'name', 'content', 'row_order');
                 return array_values($data);
             } else if ($model->type == Blocks::CONTENT_BLOCK_TYPE_ONCE) {
-                $rows = $model->getBlockContent($model->id, null, true);
+                $rows = $model->getBlockContent($model->id, true);
                 $data = ArrayHelper::map($rows, 'name', 'content', 'field_order');
                 return array_reduce($data, 'array_merge', []);
             }

@@ -2,6 +2,7 @@ Changelog
 =========
 
 ## 1.0.0 (2019-12-23)
+ * Shorting method in component
  * Added console, translations and update README.md
  * Added content component and preview of content blocks/lists
 

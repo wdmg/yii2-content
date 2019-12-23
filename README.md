@@ -45,12 +45,12 @@ To add a module to the project, add the following data in your configuration fil
 
 
 # Usage examples
-To get the content you may use the component method Yii::$app->content->getContent() with `id` or `alias` of block/list name.
+To get the content you may use the component method Yii::$app->content->get() with `id` or `alias` of block/list name.
 
 **Content block**
 
     <?php
-        if ($block = Yii::$app->content->getContent(1)) {
+        if ($block = Yii::$app->content->get(1)) {
             
             // Raw output
             echo $block['contact-email']; // where `contact-email` as filed name
@@ -58,7 +58,7 @@ To get the content you may use the component method Yii::$app->content->getConte
             
             // With ListView and ArrayDataProvider
             $dataProvider = new \yii\data\ArrayDataProvider([
-                'allModels' => Yii::$app->content->getContent(2)
+                'allModels' => Yii::$app->content->get(2)
             ]);
             echo yii\widgets\ListView::widget([
                 'dataProvider' => $dataProvider,
@@ -74,7 +74,7 @@ To get the content you may use the component method Yii::$app->content->getConte
 **Content list**
 
     <?php
-        if ($list = Yii::$app->content->getContent(1)) {
+        if ($list = Yii::$app->content->get('test-table')) {
             
             // Raw output
             foreach ($list as $row) {
@@ -84,7 +84,7 @@ To get the content you may use the component method Yii::$app->content->getConte
             
             // With GridView and ArrayDataProvider
             $dataProvider = new \yii\data\ArrayDataProvider([
-                'allModels' => Yii::$app->content->getContent(1)
+                'allModels' => Yii::$app->content->get('test-table')
             ]);
             echo \yii\grid\GridView::widget([
                 'dataProvider' => $dataProvider,
