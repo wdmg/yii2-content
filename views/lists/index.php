@@ -28,9 +28,30 @@ $this->params['breadcrumbs'][] = $this->title;
         'layout' => '{summary}<br\/>{items}<br\/>{summary}<br\/><div class="text-center">{pager}</div>',
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'id',
-            'title',
-            'description',
+            [
+                'attribute' => 'title',
+                'format' => 'html',
+                'value' => function($data) {
+                    if ($data->title & $data->description) {
+                        return '<b>' . $data->title . '</b><br/><span class="text-muted">' . mb_strimwidth(strip_tags($data->description), 0, 64, '…') . '</span>';
+                    } elseif ($data->title) {
+                        return '<b>' . $data->title . '</b>';
+                    } else {
+                        return null;
+                    }
+                }
+            ],
+            [
+                'attribute' => 'alias',
+                'format' => 'html',
+                'value' => function($data) {
+                    if ($data->alias) {
+                        return '<span style="white-space:nowrap;">' . $data->alias . '</span>';
+                    } else {
+                        return null;
+                    }
+                }
+            ],
             [
                 'attribute' => 'fields',
                 'format' => 'raw',
@@ -40,9 +61,18 @@ $this->params['breadcrumbs'][] = $this->title;
                         foreach ($fields as $field) {
                             $list[] = '<span class="label label-info">' . $field['label'] . '</span>';
                         }
-                        return join($list, " ");
+
+                        $onMore = false;
+                        if (count($list) > 5)
+                            $onMore = true;
+
+                        if ($onMore)
+                            return join(array_slice($list, 0, 5), " ") . "&nbsp;… ";
+                        else
+                            return join($list, " ");
+
                     } else {
-                        return $data->fields;
+                        return null;
                     }
                 }
             ],
@@ -117,7 +147,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             'data-toggle' => 'modal',
                             'data-target' => '#contentPreview',
                             'data-id' => $key,
-                            'data-pjax' => '1'
+                            'data-pjax' => '0'
                         ]);
                     },
                 ]
@@ -125,6 +155,9 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
     ]); ?>
     <hr/>
+    <div>
+        <?= Html::a(Yii::t('app/modules/content', 'Add new list'), ['lists/create'], ['class' => 'btn btn-success pull-right']) ?>
+    </div>
     <?php Pjax::end(); ?>
 </div>
 

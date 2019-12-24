@@ -94,6 +94,120 @@ class ListsController extends Controller
         ]);
     }
 
+    public function actionCreate()
+    {
+        $model = new Blocks();
+        $model->type = $model::CONTENT_BLOCK_TYPE_LIST;
+        if (Yii::$app->request->isAjax) {
+            if ($model->load(Yii::$app->request->post())) {
+                if ($model->validate())
+                    $success = true;
+                else
+                    $success = false;
+
+                return $this->asJson(['success' => $success, 'alias' => $model->alias, 'errors' => $model->errors]);
+            }
+        } else {
+            if ($model->load(Yii::$app->request->post())) {
+
+                if ($model->save()) {
+                    Yii::$app->getSession()->setFlash(
+                        'success',
+                        Yii::t('app/modules/content', 'Content list has been successfully added!')
+                    );
+                    return $this->redirect(['lists/index']);
+                } else {
+                    Yii::$app->getSession()->setFlash(
+                        'danger',
+                        Yii::t('app/modules/content', 'An error occurred while add the content list.')
+                    );
+                }
+            }
+        }
+
+        return $this->render('create', [
+            'module' => $this->module,
+            'model' => $model
+        ]);
+
+    }
+
+    public function actionUpdate($id)
+    {
+        $model = self::findModel($id);
+        if (Yii::$app->request->isAjax) {
+            if ($model->load(Yii::$app->request->post())) {
+                if ($model->validate())
+                    $success = true;
+                else
+                    $success = false;
+
+                return $this->asJson(['success' => $success, 'alias' => $model->alias, 'errors' => $model->errors]);
+            }
+        } else {
+            if ($model->load(Yii::$app->request->post())) {
+                if ($model->save()) {
+                    Yii::$app->getSession()->setFlash(
+                        'success',
+                        Yii::t(
+                            'app/modules/content',
+                            'OK! Content list `{title}` successfully updated.',
+                            [
+                                'title' => $model->title
+                            ]
+                        )
+                    );
+                    return $this->redirect(['lists/index']);
+                } else {
+                    Yii::$app->getSession()->setFlash(
+                        'danger',
+                        Yii::t(
+                            'app/modules/content',
+                            'An error occurred while update a content list `{title}`.',
+                            [
+                                'title' => $model->title
+                            ]
+                        )
+                    );
+                }
+            }
+        }
+
+        return $this->render('update', [
+            'module' => $this->module,
+            'model' => $model
+        ]);
+    }
+
+    public function actionDelete($id)
+    {
+        $model = $this->findModel($id);
+        if($model->delete()) {
+            Yii::$app->getSession()->setFlash(
+                'success',
+                Yii::t(
+                    'app/modules/content',
+                    'OK! Content list `{title}` successfully deleted.',
+                    [
+                        'title' => $model->title
+                    ]
+                )
+            );
+        } else {
+            Yii::$app->getSession()->setFlash(
+                'danger',
+                Yii::t(
+                    'app/modules/content',
+                    'An error occurred while deleting a content list `{title}`.',
+                    [
+                        'title' => $model->title
+                    ]
+                )
+            );
+        }
+        return $this->redirect(['lists/index']);
+    }
+
     /**
      * Finds the Newsletters model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
@@ -103,9 +217,9 @@ class ListsController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Blocks::findOne($id)) !== null)
+        if (($model = Blocks::findOne(['id' => $id, 'type' => Blocks::CONTENT_BLOCK_TYPE_LIST])) !== null)
             return $model;
 
-        throw new NotFoundHttpException(Yii::t('app/modules/content', 'The requested page does not exist.'));
+        throw new NotFoundHttpException(Yii::t('app/modules/content', 'The requested list does not exist.'));
     }
 }

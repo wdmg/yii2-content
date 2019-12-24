@@ -1,6 +1,9 @@
 Changelog
 =========
 
+## 1.0._ (2019-12-24)
+ * CRUD for blocks model
+ 
 ## 1.0.0 (2019-12-23)
  * Shorting method in component
  * Added console, translations and update README.md

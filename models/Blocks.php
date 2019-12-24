@@ -6,14 +6,13 @@ use Yii;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\ActiveRecord;
+use yii\helpers\Json;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\SluggableBehavior;
 use wdmg\content\models\Fields;
 use wdmg\content\models\Items;
 use wdmg\content\models\Content;
-use yii\helpers\Json;
-
 /**
  * This is the model class for table "{{%content_blocks}}".
  *
@@ -67,7 +66,7 @@ class Blocks extends ActiveRecord
                 'skipOnEmpty' => true,
                 'immutable' => true,
                 'value' => function ($event) {
-                    return mb_substr($this->title, 0, 45);
+                    return mb_substr($this->title, 0, 64);
                 }
             ],
             'blameable' =>  [
@@ -87,19 +86,16 @@ class Blocks extends ActiveRecord
     {
         $rules = [
             [['title', 'alias', 'type'], 'required'],
-            //[['title', 'alias', 'fields', 'type'], 'required'],
             [['title', 'alias'], 'string', 'min' => 3, 'max' => 64],
             ['description', 'string', 'max' => 255],
-            ['fields', 'string'],
-            [['type'], 'integer'],
-            [['status'], 'boolean'],
+            [['type', 'status'], 'integer'],
             ['alias', 'unique', 'message' => Yii::t('app/modules/content', 'Alias attribute must be unique.')],
             ['alias', 'match', 'pattern' => '/^[A-Za-z0-9\-\_]+$/', 'message' => Yii::t('app/modules/content','It allowed only Latin alphabet, numbers and the «-», «_» characters.')],
             [['created_at', 'updated_at'], 'safe'],
         ];
 
-        if (class_exists('\wdmg\users\models\Users') && isset(Yii::$app->modules['users'])) {
-            $rules[] = [['created_by', 'updated_by'], 'required'];
+        if (class_exists('\wdmg\users\models\Users') && (Yii::$app->hasModule('admin/users') || Yii::$app->hasModule('users'))) {
+            $rules[] = [['created_by', 'updated_by'], 'safe'];
         }
 
         return $rules;
@@ -132,10 +128,16 @@ class Blocks extends ActiveRecord
     public function beforeSave($insert)
     {
 
-        if (is_array($this->fields))
+        if (is_string($this->status))
+            $this->status = intval($this->status);
+
+        if (is_null($this->fields))
+            $this->fields = Json::encode([]);
+        elseif (is_array($this->fields))
             $this->fields = Json::encode($this->fields);
 
-        parent::beforeSave($insert);
+        return parent::beforeSave($insert);
+
     }
 
     /**

@@ -32,6 +32,33 @@ return [
     'Content preview' => 'Предпросмотр контента',
 
     'Alias attribute must be unique.' => 'Алиас атрибут должен быть уникальным',
-    'It allowed only Latin alphabet, numbers and the «-», «_» characters.' => 'Разрешены только латинские буквы, цифры и символы «-», «_».',
+    'It allowed only Latin alphabet, numbers and the «-», «_» characters.' => "Разрешена только латинница, цифры и «-», «_» символы.",
+
+    'Create a content block' => 'Создание контент-блока',
+    'Create a content list' => 'Создание списка контента',
+    'Updating block: {title}' => 'Редактирование блока: {title}',
+    'Edit block' => 'Редактирование блока',
+    'Updating list: {title}' => 'Редактирование списка: {title}',
+    'Edit list' => 'Редактирование списка',
+    'Add new block' => 'Добавить новый блок',
+    'Add new list' => 'Добавить новый список',
+    '&larr; Back to list' => '&larr; Назад к списку',
+    'Save' => 'Сохранить',
+
+    'Content block has been successfully added!' => "Блок контента был успешно добавлен!",
+    'Content list has been successfully added!' => "Список контента был успешно добавлен!",
+    'An error occurred while add the content block.' => "Произошла ошибка при добавлении блока контента `{title}`.",
+    'An error occurred while add the content list.' => "Произошла ошибка при добавлении списка контента `{title}`.",
+    'OK! Content block `{title}` successfully updated.' => "OK! Блок контента `{title}` был успешно обновлён.",
+    'OK! Content list `{title}` successfully updated.' => "OK! Список контента `{title}` был успешно обновлён.",
+    'An error occurred while update a content block `{title}`.' => "Произошла ошибка при обновлении блока контента `{title}`.",
+    'An error occurred while update a content list `{title}`.' => "Произошла ошибка при обновлении списка контента `{title}`.",
+    'OK! Content block `{title}` successfully deleted.' => "OK! Блок контента `{title}` был успешно удалён.",
+    'OK! Content list `{title}` successfully deleted.' => "OK! Список контента `{title}` был успешно удалён.",
+    'An error occurred while deleting a content block `{title}`.' => "Произошла ошибка при удалении блока контента `{title}`.",
+    'An error occurred while deleting a content list `{title}`.' => "Произошла ошибка при удалении списка контента `{title}`.",
+    'The requested block does not exist.' => "Запрошенный блок контента не существует.",
+    'The requested list does not exist.' => "Запрошенный список контента не существует.",
+
 
 ];
