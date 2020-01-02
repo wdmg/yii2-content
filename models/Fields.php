@@ -8,6 +8,7 @@ use yii\db\ActiveRecord;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\SluggableBehavior;
+use yii\helpers\Inflector;
 
 /**
  * This is the model class for table "{{%content_fields}}".
@@ -60,7 +61,7 @@ class Fields extends ActiveRecord
                 'skipOnEmpty' => true,
                 'immutable' => true,
                 'value' => function ($event) {
-                    return mb_substr($this->label, 0, 45);
+                    return Inflector::slug(mb_substr($this->label, 0, 45), '_');
                 }
             ],
             'blameable' =>  [
@@ -79,16 +80,16 @@ class Fields extends ActiveRecord
     public function rules()
     {
         $rules = [
-            [['label', 'name', 'type', 'content'], 'required'],
+            [['block_id', 'label', 'name', 'type'], 'required'],
             [['label', 'name'], 'string', 'min' => 3, 'max' => 45],
-            [['type', 'sort_order'], 'integer'],
+            [['block_id', 'type', 'sort_order'], 'integer'],
             ['params', 'string'],
-            ['name', 'match', 'pattern' => '/^[A-Za-z0-9\-\_]+$/', 'message' => Yii::t('app/modules/content','It allowed only Latin alphabet, numbers and the «-», «_» characters.')],
+            ['name', 'match', 'pattern' => '/^[A-Za-z0-9\_]+$/', 'message' => Yii::t('app/modules/content','It allowed only Latin alphabet, numbers and «_» character.')],
             [['created_at', 'updated_at'], 'safe'],
         ];
 
         if (class_exists('\wdmg\users\models\Users') && (Yii::$app->hasModule('admin/users') || Yii::$app->hasModule('users'))) {
-            $rules[] = [['created_by', 'updated_by'], 'required'];
+            $rules[] = [['created_by', 'updated_by'], 'safe'];
         }
 
         return $rules;
@@ -101,6 +102,7 @@ class Fields extends ActiveRecord
     {
         return [
             'id' => Yii::t('app/modules/content', 'ID'),
+            'block_id' => Yii::t('app/modules/content', 'Block ID'),
             'label' => Yii::t('app/modules/content', 'Label'),
             'name' => Yii::t('app/modules/content', 'Name'),
             'type' => Yii::t('app/modules/content', 'Type'),
@@ -111,5 +113,25 @@ class Fields extends ActiveRecord
             'updated_at' => Yii::t('app/modules/content', 'Updated at'),
             'updated_by' => Yii::t('app/modules/content', 'Updated by'),
         ];
+    }
+
+    /**
+     * @return array of list
+     */
+    public function getTypesList($allStatuses = false)
+    {
+        if ($allStatuses)
+            $list[] = [
+                '*' => Yii::t('app/modules/content', 'All statuses')
+            ];
+
+        $list[] = [
+            self::CONTENT_FIELD_TYPE_STRING => Yii::t('app/modules/content', 'String'),
+            self::CONTENT_FIELD_TYPE_TEXT => Yii::t('app/modules/content', 'Text'),
+            self::CONTENT_FIELD_TYPE_HTML => Yii::t('app/modules/content', 'HTML')
+
+        ];
+
+        return $list;
     }
 }

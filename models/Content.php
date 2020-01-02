@@ -22,6 +22,9 @@ use yii\behaviors\BlameableBehavior;
  */
 class Content extends ActiveRecord
 {
+
+    public $block;
+
     /**
      * {@inheritdoc}
      */
@@ -67,7 +70,7 @@ class Content extends ActiveRecord
         ];
 
         if (class_exists('\wdmg\users\models\Users') && (Yii::$app->hasModule('admin/users') || Yii::$app->hasModule('users'))) {
-            $rules[] = [['created_by', 'updated_by'], 'required'];
+            $rules[] = [['created_by', 'updated_by'], 'safe'];
         }
 
         return $rules;
@@ -80,7 +83,9 @@ class Content extends ActiveRecord
     {
         return [
             'id' => Yii::t('app/modules/content', 'ID'),
+            'field' => Yii::t('app/modules/content', 'Field'),
             'field_id' => Yii::t('app/modules/content', 'Field ID'),
+            'block' => Yii::t('app/modules/content', 'Block'),
             'block_id' => Yii::t('app/modules/content', 'Block ID'),
             'content' => Yii::t('app/modules/content', 'Content'),
             'created_at' => Yii::t('app/modules/content', 'Created at'),
@@ -89,4 +94,13 @@ class Content extends ActiveRecord
             'updated_by' => Yii::t('app/modules/content', 'Updated by'),
         ];
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getField()
+    {
+        return $this->hasOne(Fields::class, ['id' => 'field_id']);
+    }
+
 }

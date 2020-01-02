@@ -33,7 +33,7 @@ class m191220_233620_content_items extends Migration
             'block_id',
             '{{%content_blocks}}',
             'id',
-            'NO ACTION',
+            'CASCADE',
             'CASCADE'
         );
         $this->addForeignKey(
@@ -42,7 +42,7 @@ class m191220_233620_content_items extends Migration
             'ext_id',
             '{{%content}}',
             'id',
-            'NO ACTION',
+            'CASCADE',
             'CASCADE'
         );
 

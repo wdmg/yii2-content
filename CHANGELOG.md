@@ -1,8 +1,10 @@
 Changelog
 =========
 
-## 1.0._ (2019-12-24)
- * CRUD for blocks model
+## 1.0.1 (2020-01-02)
+ * CRUD for blocks, content and fields
+ * Added views and controllers
+ * Added translations
  
 ## 1.0.0 (2019-12-23)
  * Shorting method in component

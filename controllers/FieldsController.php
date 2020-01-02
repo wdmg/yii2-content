@@ -2,19 +2,19 @@
 
 namespace wdmg\content\controllers;
 
+use wdmg\content\models\Blocks;
 use Yii;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use \yii\helpers\ArrayHelper;
-use \yii\data\ArrayDataProvider;
-use wdmg\content\models\Blocks;
-use wdmg\content\models\BlocksSearch;
+use yii\helpers\ArrayHelper;
+use yii\data\ActiveDataProvider;
+use wdmg\content\models\Fields;
 
 /**
- * ListsController implements the CRUD actions.
+ * FieldsController implements the CRUD actions.
  */
-class ListsController extends Controller
+class FieldsController extends Controller
 {
     /**
      * {@inheritdoc}
@@ -55,70 +55,51 @@ class ListsController extends Controller
         return $behaviors;
     }
 
-    /**
-     * Lists of all Content lists.
-     * @return mixed
-     */
-    public function actionIndex()
+    public function actionIndex($block_id)
     {
-        $searchModel = new BlocksSearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, ['type' => Blocks::CONTENT_BLOCK_TYPE_LIST]);
+        $block = Blocks::findModel(intval($block_id));
+        $model = new Fields();
+        $query = $model::find()->where(['block_id' => intval($block_id)]);
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+        ]);
+
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
-            'module' => $this->module
-        ]);
-    }
-
-    public function actionView($id)
-    {
-        $model = self::findModel($id);
-        $rows = $model->getListContent($model->id, true);
-        $data = ArrayHelper::map($rows, 'name', 'content', 'row_order');
-        $data = array_values($data);
-        $dataProvider = new ArrayDataProvider([
-            'allModels' => $data,
-            'sort' => [
-                'attributes' => array_keys($data)
-            ],
-            'pagination' => [
-                'pageSize' => 20,
-            ],
-        ]);
-
-        return $this->renderAjax('_view', [
             'model' => $model,
+            'block' => $block,
             'dataProvider' => $dataProvider,
             'module' => $this->module
         ]);
     }
 
-    public function actionCreate()
+    public function actionCreate($block_id)
     {
-        $model = new Blocks();
-        $model->type = $model::CONTENT_BLOCK_TYPE_LIST;
+        $model = new Fields();
+        $block = Blocks::findModel(intval($block_id));
         if (Yii::$app->request->isAjax) {
             if ($model->load(Yii::$app->request->post())) {
+
                 if ($model->validate())
                     $success = true;
                 else
                     $success = false;
 
-                return $this->asJson(['success' => $success, 'alias' => $model->alias, 'errors' => $model->errors]);
+                return $this->asJson(['success' => $success, 'name' => $model->name, 'errors' => $model->errors]);
             }
         } else {
             if ($model->load(Yii::$app->request->post())) {
-
+                $sort_order = Fields::find()->where(['block_id' => $block->id])->max('row_order');
+                $model->sort_order = intval($sort_order) + 10;
                 if ($model->save()) {
                     Yii::$app->getSession()->setFlash(
                         'success',
-                        Yii::t('app/modules/content', 'Content list has been successfully added!')
+                        Yii::t('app/modules/content', 'Field has been successfully added!')
                     );
-                    return $this->redirect(['lists/index']);
+                    return $this->redirect(['fields/index', 'block_id' => $block->id]);
                 } else {
                     Yii::$app->getSession()->setFlash(
                         'danger',
-                        Yii::t('app/modules/content', 'An error occurred while add the content list.')
+                        Yii::t('app/modules/content', 'An error occurred while add the field.')
                     );
                 }
             }
@@ -126,14 +107,15 @@ class ListsController extends Controller
 
         return $this->render('create', [
             'module' => $this->module,
-            'model' => $model
+            'model' => $model,
+            'block' => $block
         ]);
-
     }
 
-    public function actionUpdate($id)
+    public function actionUpdate($id, $block_id)
     {
-        $model = self::findModel($id);
+        $block = Blocks::findModel(intval($block_id));
+        $model = self::findModel($id, $block_id);
         if (Yii::$app->request->isAjax) {
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->validate())
@@ -141,7 +123,7 @@ class ListsController extends Controller
                 else
                     $success = false;
 
-                return $this->asJson(['success' => $success, 'alias' => $model->alias, 'errors' => $model->errors]);
+                return $this->asJson(['success' => $success, 'name' => $model->name, 'errors' => $model->errors]);
             }
         } else {
             if ($model->load(Yii::$app->request->post())) {
@@ -150,21 +132,21 @@ class ListsController extends Controller
                         'success',
                         Yii::t(
                             'app/modules/content',
-                            'OK! Content list `{title}` successfully updated.',
+                            'OK! Field `{label}` successfully updated.',
                             [
-                                'title' => $model->title
+                                'label' => $model->label
                             ]
                         )
                     );
-                    return $this->redirect(['lists/index']);
+                    return $this->redirect(['fields/index', 'block_id' => $block_id]);
                 } else {
                     Yii::$app->getSession()->setFlash(
                         'danger',
                         Yii::t(
                             'app/modules/content',
-                            'An error occurred while update a content list `{title}`.',
+                            'An error occurred while update a field `{label}`.',
                             [
-                                'title' => $model->title
+                                'label' => $model->label
                             ]
                         )
                     );
@@ -174,21 +156,22 @@ class ListsController extends Controller
 
         return $this->render('update', [
             'module' => $this->module,
-            'model' => $model
+            'model' => $model,
+            'block' => $block
         ]);
     }
 
-    public function actionDelete($id)
+    public function actionDelete($id, $block_id)
     {
-        $model = $this->findModel($id);
+        $model = $this->findModel(intval($id), intval($block_id));
         if($model->delete()) {
             Yii::$app->getSession()->setFlash(
                 'success',
                 Yii::t(
                     'app/modules/content',
-                    'OK! Content list `{title}` successfully deleted.',
+                    'OK! Field `{label}` successfully deleted.',
                     [
-                        'title' => $model->title
+                        'label' => $model->label
                     ]
                 )
             );
@@ -197,28 +180,29 @@ class ListsController extends Controller
                 'danger',
                 Yii::t(
                     'app/modules/content',
-                    'An error occurred while deleting a content list `{title}`.',
+                    'An error occurred while deleting a field `{label}`.',
                     [
-                        'title' => $model->title
+                        'label' => $model->label
                     ]
                 )
             );
         }
-        return $this->redirect(['lists/index']);
+        return $this->redirect(['fields/index', 'block_id' => intval($block_id)]);
     }
 
     /**
      * Finds the Newsletters model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
+     * @param integer $block_id
      * @return ActiveRecord model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($id)
+    protected function findModel($id, $block_id = null)
     {
-        if (($model = Blocks::findOne(['id' => $id, 'type' => Blocks::CONTENT_BLOCK_TYPE_LIST])) !== null)
+        if (($model = Fields::findOne(['id' => $id, 'block_id' => $block_id])) !== null)
             return $model;
 
-        throw new NotFoundHttpException(Yii::t('app/modules/content', 'The requested list does not exist.'));
+        throw new NotFoundHttpException(Yii::t('app/modules/content', 'The requested filed does not exist.'));
     }
 }

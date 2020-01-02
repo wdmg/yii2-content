@@ -46,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'fields',
                 'format' => 'raw',
                 'value' => function($data) {
+                    $html = '';
                     if ($fields = $data->getFields($data->fields)) {
                         $list = [];
                         foreach ($fields as $field) {
@@ -57,13 +58,54 @@ $this->params['breadcrumbs'][] = $this->title;
                             $onMore = true;
 
                         if ($onMore)
-                            return join(array_slice($list, 0, 5), " ") . "&nbsp;… ";
+                            $html = join(array_slice($list, 0, 5), " ") . "&nbsp;… ";
                         else
-                            return join($list, " ");
+                            $html = join($list, " ");
 
-                    } else {
-                        return null;
                     }
+
+                    $html .= Html::a(
+                        Yii::t('app/modules/content', 'Edit') . '&nbsp;<span class="glyphicon glyphicon-edit"></span>',
+                        Url::toRoute(['fields/index', 'block_id' => $data->id]),
+                        [
+                            'class' => 'btn btn-link btn-sm btn-block',
+                            'title' => Yii::t('app/modules/content', 'Edit fields'),
+                            'data-pjax' => '0'
+                        ]
+                    );
+                    return $html;
+                }
+            ],
+            [
+                'attribute' => 'content',
+                'format' => 'raw',
+                'value' => function($data) {
+                    $html = '';
+
+                    $html .= Html::a(
+                        Yii::t('app/modules/content', 'Edit') . '&nbsp;<span class="glyphicon glyphicon-edit"></span>',
+                        Url::toRoute(['content/index', 'block_id' => $data->id]),
+                        [
+                            'class' => 'btn btn-link btn-sm btn-block',
+                            'title' => Yii::t('app/modules/content', 'Edit content'),
+                            'data-pjax' => '0'
+                        ]
+                    );
+
+                    $html .= Html::a(
+                        Yii::t('app/modules/content', 'Preview') . '&nbsp;<span class="glyphicon glyphicon-eye-open"></span>',
+                        Url::toRoute(['blocks/view', 'id' => $data->id]),
+                        [
+                            'class' => 'btn btn-link btn-sm btn-block content-preview-link',
+                            'title' => Yii::t('app/modules/content', 'Content preview'),
+                            'data-toggle' => 'modal',
+                            'data-target' => '#contentPreview',
+                            'data-id' => $data->id,
+                            'data-pjax' => '0'
+                        ]
+                    );
+
+                    return $html;
                 }
             ],
             [
@@ -93,7 +135,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 }
             ],
-            'created_at',
+            /*'created_at',
             [
                 'attribute' => 'created_by',
                 'format' => 'raw',
@@ -120,10 +162,10 @@ $this->params['breadcrumbs'][] = $this->title;
                     else
                         return $data->updated_by;
                 }
-            ],
+            ],*/
             [
                 'class' => 'yii\grid\ActionColumn',
-                'header' => Yii::t('app/modules/newsletters', 'Actions'),
+                'header' => Yii::t('app/modules/content', 'Actions'),
                 'contentOptions' => [
                     'class' => 'text-center',
                     'style' => 'min-width:120px',

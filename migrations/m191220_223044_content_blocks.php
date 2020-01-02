@@ -5,7 +5,7 @@ use yii\db\Migration;
 /**
  * Class m191220_231744_content_blocks
  */
-class m191220_231744_content_blocks extends Migration
+class m191220_223044_content_blocks extends Migration
 {
     /**
      * {@inheritdoc}

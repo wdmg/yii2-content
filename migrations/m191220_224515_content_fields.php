@@ -21,6 +21,7 @@ class m191220_224515_content_fields extends Migration
         $this->createTable('{{%content_fields}}', [
             'id' => $this->primaryKey(),
 
+            'block_id' => $this->integer(11),
             'label' => $this->string(45)->notNull(),
             'name' => $this->string(45)->notNull(),
             'type' => $this->tinyInteger(1)->notNull()->defaultValue(1), // 1 - string, 2 - text, 3 - html
@@ -32,6 +33,17 @@ class m191220_224515_content_fields extends Migration
             'updated_at' => $this->datetime()->defaultExpression('CURRENT_TIMESTAMP'),
             'updated_by' => $this->integer(11),
         ], $tableOptions);
+
+        $this->createIndex('{{%idx-content_fields-blocks}}', '{{%content_fields}}', ['block_id']);
+        $this->addForeignKey(
+            'fk_content_fields_to_blocks',
+            '{{%content_fields}}',
+            'block_id',
+            '{{%content_blocks}}',
+            'id',
+            'CASCADE',
+            'CASCADE'
+        );
 
         if (class_exists('\wdmg\users\models\Users')) {
             $this->createIndex('{{%idx-content_fields-author}}','{{%content_fields}}', ['created_by', 'updated_by'], false);
@@ -64,6 +76,12 @@ class m191220_224515_content_fields extends Migration
      */
     public function safeDown()
     {
+
+        $this->dropIndex('{{%idx-content_fields-blocks}}', '{{%content_fields}}');
+        $this->dropForeignKey(
+            'fk_content_fields_to_blocks',
+            '{{%content_fields}}'
+        );
 
         if (class_exists('\wdmg\users\models\Users')) {
             $userTable = \wdmg\users\models\Users::tableName();

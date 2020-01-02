@@ -111,6 +111,7 @@ class Blocks extends ActiveRecord
             'title' => Yii::t('app/modules/content', 'Title'),
             'description' => Yii::t('app/modules/content', 'Description'),
             'alias' => Yii::t('app/modules/content', 'Alias'),
+            'content' => Yii::t('app/modules/content', 'Content'),
             'fields' => Yii::t('app/modules/content', 'Fields'),
             'type' => Yii::t('app/modules/content', 'Type'),
             'status' => Yii::t('app/modules/content', 'Status'),
@@ -164,7 +165,10 @@ class Blocks extends ActiveRecord
             else
                 return Fields::find()->where(['id' => $field_id])->all();
         } else {
-            return null;
+            if ($asArray)
+                return Fields::find()->where(['block_id' => $this->id])->asArray()->all();
+            else
+                return Fields::find()->where(['block_id' => $this->id])->all();
         }
     }
 
@@ -241,7 +245,7 @@ class Blocks extends ActiveRecord
             'blocks.status' => self::CONTENT_BLOCK_STATUS_PUBLISHED
         ]);
 
-        $query->groupBy(['content.content'])->orderBy(['fields.sort_order' => 'ASC']);
+        $query->orderBy(['fields.sort_order' => 'ASC']);
 
         if ($asArray)
             return $query->asArray()->all();
@@ -279,7 +283,8 @@ class Blocks extends ActiveRecord
             'blocks.status' => self::CONTENT_BLOCK_STATUS_PUBLISHED
         ]);
 
-        $query->groupBy(['content.content'])->orderBy(['items.row_order' => 'ASC', 'fields.sort_order' => 'ASC']);
+        $query->andWhere('`items`.`row_order` != 0');
+        $query->orderBy(['items.row_order' => 'ASC', 'fields.sort_order' => 'ASC']);
 
         if ($asArray)
             return $query->asArray()->all();
