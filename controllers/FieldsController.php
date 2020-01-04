@@ -88,7 +88,8 @@ class FieldsController extends Controller
             }
         } else {
             if ($model->load(Yii::$app->request->post())) {
-                $sort_order = Fields::find()->where(['block_id' => $block->id])->max('row_order');
+                $sort_order = Fields::find()->where(['block_id' => $block->id])->max('sort_order');
+                $model->block_id = $block->id;
                 $model->sort_order = intval($sort_order) + 10;
                 if ($model->save()) {
                     Yii::$app->getSession()->setFlash(
