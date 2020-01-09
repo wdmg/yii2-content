@@ -9,6 +9,7 @@ use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use wdmg\content\models\Blocks;
 use wdmg\content\models\BlocksSearch;
+use yii\web\NotFoundHttpException;
 
 /**
  * BlocksController implements the CRUD actions.

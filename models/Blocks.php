@@ -13,6 +13,7 @@ use yii\behaviors\SluggableBehavior;
 use wdmg\content\models\Fields;
 use wdmg\content\models\Items;
 use wdmg\content\models\Content;
+
 /**
  * This is the model class for table "{{%content_blocks}}".
  *
