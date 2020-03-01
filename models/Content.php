@@ -103,4 +103,25 @@ class Content extends ActiveRecord
         return $this->hasOne(Fields::class, ['id' => 'field_id']);
     }
 
+    /**
+     * @return object of \yii\db\ActiveQuery
+     */
+    public function getCreatedBy()
+    {
+        if (class_exists('\wdmg\users\models\Users'))
+            return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'created_by']);
+        else
+            return $this->created_by;
+    }
+
+    /**
+     * @return object of \yii\db\ActiveQuery
+     */
+    public function getUpdatedBy()
+    {
+        if (class_exists('\wdmg\users\models\Users'))
+            return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'updated_by']);
+        else
+            return $this->updated_by;
+    }
 }

@@ -295,25 +295,25 @@ class Blocks extends ActiveRecord
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return object of \yii\db\ActiveQuery
      */
-    public function getCreated()
+    public function getCreatedBy()
     {
-        if (class_exists('\wdmg\users\models\Users') && (Yii::$app->hasModule('admin/users') || Yii::$app->hasModule('users')))
+        if (class_exists('\wdmg\users\models\Users'))
             return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'created_by']);
         else
-            return null;
+            return $this->created_by;
     }
 
     /**
-     * @return \yii\db\ActiveQuery
+     * @return object of \yii\db\ActiveQuery
      */
-    public function getUpdated()
+    public function getUpdatedBy()
     {
-        if (class_exists('\wdmg\users\models\Users') && (Yii::$app->hasModule('admin/users') || Yii::$app->hasModule('users')))
+        if (class_exists('\wdmg\users\models\Users'))
             return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'updated_by']);
         else
-            return null;
+            return $this->updated_by;
     }
 
     /**

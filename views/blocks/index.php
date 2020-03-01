@@ -135,34 +135,53 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 }
             ],
-            /*'created_at',
+
             [
-                'attribute' => 'created_by',
-                'format' => 'raw',
+                'attribute' => 'created',
+                'label' => Yii::t('app/modules/content','Created'),
+                'format' => 'html',
                 'value' => function($data) {
-                    if ($data->created->id && $data->created->username)
-                        return Html::a($data->created->username, ['../admin/users/view/', 'id' => $data->created->id], [
+
+                    $output = "";
+                    if ($user = $data->createdBy) {
+                        $output = Html::a($user->username, ['../admin/users/view/?id='.$user->id], [
                             'target' => '_blank',
                             'data-pjax' => 0
                         ]);
-                    else
-                        return $data->created_by;
+                    } else if ($data->created_by) {
+                        $output = $data->created_by;
+                    }
+
+                    if (!empty($output))
+                        $output .= ", ";
+
+                    $output .= Yii::$app->formatter->format($data->updated_at, 'datetime');
+                    return $output;
                 }
             ],
-            'updated_at',
             [
-                'attribute' => 'updated_by',
-                'format' => 'raw',
+                'attribute' => 'updated',
+                'label' => Yii::t('app/modules/content','Updated'),
+                'format' => 'html',
                 'value' => function($data) {
-                    if ($data->updated->id && $data->updated->username)
-                        return Html::a($data->updated->username, ['../admin/users/view/', 'id' => $data->updated->id], [
+
+                    $output = "";
+                    if ($user = $data->updatedBy) {
+                        $output = Html::a($user->username, ['../admin/users/view/?id='.$user->id], [
                             'target' => '_blank',
                             'data-pjax' => 0
                         ]);
-                    else
-                        return $data->updated_by;
+                    } else if ($data->updated_by) {
+                        $output = $data->updated_by;
+                    }
+
+                    if (!empty($output))
+                        $output .= ", ";
+
+                    $output .= Yii::$app->formatter->format($data->updated_at, 'datetime');
+                    return $output;
                 }
-            ],*/
+            ],
             [
                 'class' => 'yii\grid\ActionColumn',
                 'header' => Yii::t('app/modules/content', 'Actions'),
