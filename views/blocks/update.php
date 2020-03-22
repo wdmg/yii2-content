@@ -11,7 +11,7 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Cont
 $this->params['breadcrumbs'][] = Yii::t('app/modules/pages', 'Edit block');
 
 ?>
-<div class="content-blocks-header">
+<div class="page-header">
     <h1><?= Html::encode($this->title) ?> <small class="text-muted pull-right">[v.<?= $module->version ?>]</small></h1>
 </div>
 <div class="content-blocks-update">

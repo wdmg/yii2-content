@@ -31,7 +31,7 @@ else
 
 
 ?>
-<div class="content-content-header">
+<div class="page-header">
     <h1><?= Html::encode($this->title) ?> <small class="text-muted pull-right">[v.<?= $module->version ?>]</small></h1>
 </div>
 <div class="content-content-update">

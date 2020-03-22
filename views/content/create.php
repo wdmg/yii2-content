@@ -15,7 +15,7 @@ $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', $bloc
 $this->params['breadcrumbs'][] = Yii::t('app/modules/content', 'New row');
 
 ?>
-<div class="content-content-header">
+<div class="page-header">
     <h1><?= Html::encode($this->title) ?> <small class="text-muted pull-right">[v.<?= $module->version ?>]</small></h1>
 </div>
 <div class="content-content-create">

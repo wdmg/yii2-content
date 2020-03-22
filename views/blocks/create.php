@@ -10,7 +10,7 @@ $this->title = Yii::t('app/modules/content', 'Create a content block');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Content blocks'), 'url' => ['blocks/index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="content-blocks-header">
+<div class="page-header">
     <h1><?= Html::encode($this->title) ?> <small class="text-muted pull-right">[v.<?= $module->version ?>]</small></h1>
 </div>
 <div class="content-blocks-create">

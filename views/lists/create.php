@@ -10,7 +10,7 @@ $this->title = Yii::t('app/modules/content', 'Create a content list');
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Content lists'), 'url' => ['lists/index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="content-lists-header">
+<div class="page-header">
     <h1><?= Html::encode($this->title) ?> <small class="text-muted pull-right">[v.<?= $module->version ?>]</small></h1>
 </div>
 <div class="content-lists-create">

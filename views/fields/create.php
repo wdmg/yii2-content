@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = ['label' => $block->title, 'url' => ['fields/in
 $this->params['breadcrumbs'][] = $this->title;
 
 ?>
-<div class="content-fields-header">
+<div class="page-header">
     <h1><?= Html::encode($this->title) ?> <small class="text-muted pull-right">[v.<?= $module->version ?>]</small></h1>
 </div>
 <div class="content-fields-create">
