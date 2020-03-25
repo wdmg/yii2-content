@@ -72,7 +72,22 @@ else
                             },
                         ]
                     ]
-                )
+                ),
+                'pager' => [
+                    'options' => [
+                        'class' => 'pagination',
+                    ],
+                    'maxButtonCount' => 5,
+                    'activePageCssClass' => 'active',
+                    'prevPageCssClass' => '',
+                    'nextPageCssClass' => '',
+                    'firstPageCssClass' => 'previous',
+                    'lastPageCssClass' => 'next',
+                    'firstPageLabel' => Yii::t('app/modules/content', 'First page'),
+                    'lastPageLabel'  => Yii::t('app/modules/content', 'Last page'),
+                    'prevPageLabel'  => Yii::t('app/modules/content', '&larr; Prev page'),
+                    'nextPageLabel'  => Yii::t('app/modules/content', 'Next page &rarr;')
+                ],
             ]);
         } else {
             echo GridView::widget([
@@ -92,6 +107,21 @@ else
                         }
                     ],
                     'content'
+                ],
+                'pager' => [
+                    'options' => [
+                        'class' => 'pagination',
+                    ],
+                    'maxButtonCount' => 5,
+                    'activePageCssClass' => 'active',
+                    'prevPageCssClass' => '',
+                    'nextPageCssClass' => '',
+                    'firstPageCssClass' => 'previous',
+                    'lastPageCssClass' => 'next',
+                    'firstPageLabel' => Yii::t('app/modules/content', 'First page'),
+                    'lastPageLabel'  => Yii::t('app/modules/content', 'Last page'),
+                    'prevPageLabel'  => Yii::t('app/modules/content', '&larr; Prev page'),
+                    'nextPageLabel'  => Yii::t('app/modules/content', 'Next page &rarr;')
                 ],
             ]);
         }

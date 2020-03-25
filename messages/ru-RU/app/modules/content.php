@@ -87,6 +87,11 @@ return [
     'List of content: {title}' => 'Список контента: {title}',
     'Content block: {title}' => 'Блок контента: {title}',
 
+    'First page' => 'Первая страница',
+    'Last page' => 'Последняя страница',
+    '&larr; Prev page' => '&larr; Предыдущая страница',
+    'Next page &rarr;' => 'Следующая страница &rarr;',
+
     'New row' => 'Новая строка',
     'Add a row for: {title}' => 'Новая строка для: {title}',
     'Edit row' => 'Редактирование строки',

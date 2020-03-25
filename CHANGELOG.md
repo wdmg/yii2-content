@@ -1,7 +1,15 @@
 Changelog
 =========
 
+## 1.0.2 (2020-03-25)
+ * Added pagination
+ * Up to date dependencies
+ * Fix class in page header
+ * Created/updated user in views
+ * yii\web\NotFoundHttpException in controller
+ 
 ## 1.0.1 (2020-01-02)
+ * ActiveRecord bugfix
  * CRUD for blocks, content and fields
  * Added views and controllers
  * Added translations
