@@ -190,11 +190,39 @@ class ContentController extends Controller
 
             if (!$hasError) {
                 if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'New row of content list with ID `' . $block->id . '` has been successfully added.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'success',
                         Yii::t('app/modules/content', 'A row has been successfully added!')
                     );
                 } else {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'New content with ID `' . $block->id . '` has been successfully added.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'success',
                         Yii::t('app/modules/content', 'Content has been successfully added!')
@@ -203,11 +231,39 @@ class ContentController extends Controller
                 return $this->redirect(['content/index', 'block_id' => $block_id]);
             } else {
                 if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'An error occurred while add the row of content list, ID: ' . $block->id,
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'danger',
                         Yii::t('app/modules/content', 'An error occurred while add the row.')
                     );
                 } else {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'An error occurred while add the content, ID: ' . $block->id,
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'danger',
                         Yii::t('app/modules/content', 'An error occurred while add the content.')
@@ -318,11 +374,39 @@ class ContentController extends Controller
 
             if (!$hasError) {
                 if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'Content row with list ID `' . $block->id . '` has been successfully updated.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'success',
                         Yii::t('app/modules/content', 'A row has been successfully updated!')
                     );
                 } else {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'Content with block ID `' . $block->id . '` has been successfully updated.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'success',
                         Yii::t('app/modules/content', 'Content has been successfully updated!')
@@ -331,11 +415,39 @@ class ContentController extends Controller
                 return $this->redirect(['content/index', 'block_id' => $block_id]);
             } else {
                 if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'An error occurred while update the content row with list ID `' . $block->id . '`.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'danger',
                         Yii::t('app/modules/content', 'An error occurred while updating the row.')
                     );
                 } else {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'An error occurred while update the content with block ID `' . $block->id . '`.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'danger',
                         Yii::t('app/modules/content', 'An error occurred while updating the content.')
@@ -374,6 +486,20 @@ class ContentController extends Controller
 
         if (!$hasErrors) {
             if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
+                // Log activity
+                if (
+                    class_exists('\wdmg\activity\models\Activity') &&
+                    $this->module->moduleLoaded('activity') &&
+                    isset(Yii::$app->activity)
+                ) {
+                    Yii::$app->activity->set(
+                        'Row from list `' . $block->title . '` with ID `' . $block->id . '` has been successfully deleted.',
+                        $this->uniqueId . ":" . $this->action->id,
+                        'success',
+                        1
+                    );
+                }
+
                 Yii::$app->getSession()->setFlash(
                     'success',
                     Yii::t(
@@ -385,6 +511,20 @@ class ContentController extends Controller
                     )
                 );
             } else {
+                // Log activity
+                if (
+                    class_exists('\wdmg\activity\models\Activity') &&
+                    $this->module->moduleLoaded('activity') &&
+                    isset(Yii::$app->activity)
+                ) {
+                    Yii::$app->activity->set(
+                        'Content for `' . $block->title . '` with ID `' . $block->id . '` has been successfully deleted.',
+                        $this->uniqueId . ":" . $this->action->id,
+                        'success',
+                        1
+                    );
+                }
+
                 Yii::$app->getSession()->setFlash(
                     'success',
                     Yii::t(
@@ -398,6 +538,20 @@ class ContentController extends Controller
             }
         } else {
             if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
+                // Log activity
+                if (
+                    class_exists('\wdmg\activity\models\Activity') &&
+                    $this->module->moduleLoaded('activity') &&
+                    isset(Yii::$app->activity)
+                ) {
+                    Yii::$app->activity->set(
+                        'An error occurred while deleting the row of list `' . $block->title . '` with ID `' . $block->id . '`.',
+                        $this->uniqueId . ":" . $this->action->id,
+                        'danger',
+                        1
+                    );
+                }
+
                 Yii::$app->getSession()->setFlash(
                     'danger',
                     Yii::t(
@@ -409,6 +563,20 @@ class ContentController extends Controller
                     )
                 );
             } else {
+                // Log activity
+                if (
+                    class_exists('\wdmg\activity\models\Activity') &&
+                    $this->module->moduleLoaded('activity') &&
+                    isset(Yii::$app->activity)
+                ) {
+                    Yii::$app->activity->set(
+                        'An error occurred while deleting the content for `' . $block->title . '` with ID `' . $block->id . '`.',
+                        $this->uniqueId . ":" . $this->action->id,
+                        'danger',
+                        1
+                    );
+                }
+
                 Yii::$app->getSession()->setFlash(
                     'danger',
                     Yii::t(

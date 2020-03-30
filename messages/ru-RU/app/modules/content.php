@@ -73,6 +73,8 @@ return [
     'Edit content' => 'Редактировать контент',
     'Preview' => 'Предпросмотр',
     'Content preview' => 'Предпросмотр контента',
+    'Delete content' => 'Удалить контент',
+    'Are you sure you want to delete this content?' => 'Вы действительно желаете удалить этот контент?',
 
     'Fields for: {title}' => 'Поля для: {title}',
     'Add new field' => 'Добавить новое поле',

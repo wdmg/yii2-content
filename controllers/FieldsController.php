@@ -92,12 +92,40 @@ class FieldsController extends Controller
                 $model->block_id = $block->id;
                 $model->sort_order = intval($sort_order) + 10;
                 if ($model->save()) {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'New content field `' . $model->label . '` with ID `' . $model->id . '` has been successfully added.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'success',
                         Yii::t('app/modules/content', 'Field has been successfully added!')
                     );
                     return $this->redirect(['fields/index', 'block_id' => $block->id]);
                 } else {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'An error occurred while add the content field: ' . $model->label,
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'danger',
                         Yii::t('app/modules/content', 'An error occurred while add the field.')
@@ -129,6 +157,20 @@ class FieldsController extends Controller
         } else {
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->save()) {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'Field of content `' . $model->label . '` with ID `' . $model->id . '` has been successfully updated.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'success',
                         Yii::t(
@@ -141,6 +183,20 @@ class FieldsController extends Controller
                     );
                     return $this->redirect(['fields/index', 'block_id' => $block_id]);
                 } else {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'An error occurred while update the content field `' . $model->label . '` with ID `' . $model->id . '`.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'danger',
                         Yii::t(
@@ -165,7 +221,21 @@ class FieldsController extends Controller
     public function actionDelete($id, $block_id)
     {
         $model = $this->findModel(intval($id), intval($block_id));
-        if($model->delete()) {
+        if ($model->delete()) {
+            // Log activity
+            if (
+                class_exists('\wdmg\activity\models\Activity') &&
+                $this->module->moduleLoaded('activity') &&
+                isset(Yii::$app->activity)
+            ) {
+                Yii::$app->activity->set(
+                    'Field of content `' . $model->label . '` with ID `' . $model->id . '` has been successfully deleted.',
+                    $this->uniqueId . ":" . $this->action->id,
+                    'success',
+                    1
+                );
+            }
+
             Yii::$app->getSession()->setFlash(
                 'success',
                 Yii::t(
@@ -177,6 +247,20 @@ class FieldsController extends Controller
                 )
             );
         } else {
+            // Log activity
+            if (
+                class_exists('\wdmg\activity\models\Activity') &&
+                $this->module->moduleLoaded('activity') &&
+                isset(Yii::$app->activity)
+            ) {
+                Yii::$app->activity->set(
+                    'An error occurred while deleting the content field `' . $model->title . '` with ID `' . $model->id . '`.',
+                    $this->uniqueId . ":" . $this->action->id,
+                    'danger',
+                    1
+                );
+            }
+
             Yii::$app->getSession()->setFlash(
                 'danger',
                 Yii::t(

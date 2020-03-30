@@ -110,12 +110,40 @@ class ListsController extends Controller
             if ($model->load(Yii::$app->request->post())) {
 
                 if ($model->save()) {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'New content list `' . $model->title . '` with ID `' . $model->id . '` has been successfully added.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'success',
                         Yii::t('app/modules/content', 'Content list has been successfully added!')
                     );
                     return $this->redirect(['lists/index']);
                 } else {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'An error occurred while add the content list: ' . $model->title,
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'danger',
                         Yii::t('app/modules/content', 'An error occurred while add the content list.')
@@ -146,6 +174,20 @@ class ListsController extends Controller
         } else {
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->save()) {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'Content list `' . $model->title . '` with ID `' . $model->id . '` has been successfully updated.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'success',
                         Yii::t(
@@ -158,6 +200,20 @@ class ListsController extends Controller
                     );
                     return $this->redirect(['lists/index']);
                 } else {
+                    // Log activity
+                    if (
+                        class_exists('\wdmg\activity\models\Activity') &&
+                        $this->module->moduleLoaded('activity') &&
+                        isset(Yii::$app->activity)
+                    ) {
+                        Yii::$app->activity->set(
+                            'An error occurred while update the content list `' . $model->title . '` with ID `' . $model->id . '`.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+                    }
+
                     Yii::$app->getSession()->setFlash(
                         'danger',
                         Yii::t(
@@ -181,7 +237,21 @@ class ListsController extends Controller
     public function actionDelete($id)
     {
         $model = $this->findModel($id);
-        if($model->delete()) {
+        if ($model->delete()) {
+            // Log activity
+            if (
+                class_exists('\wdmg\activity\models\Activity') &&
+                $this->module->moduleLoaded('activity') &&
+                isset(Yii::$app->activity)
+            ) {
+                Yii::$app->activity->set(
+                    'Content list `' . $model->title . '` with ID `' . $model->id . '` has been successfully deleted.',
+                    $this->uniqueId . ":" . $this->action->id,
+                    'success',
+                    1
+                );
+            }
+
             Yii::$app->getSession()->setFlash(
                 'success',
                 Yii::t(
@@ -193,6 +263,20 @@ class ListsController extends Controller
                 )
             );
         } else {
+            // Log activity
+            if (
+                class_exists('\wdmg\activity\models\Activity') &&
+                $this->module->moduleLoaded('activity') &&
+                isset(Yii::$app->activity)
+            ) {
+                Yii::$app->activity->set(
+                    'An error occurred while deleting the content list `' . $model->title . '` with ID `' . $model->id . '`.',
+                    $this->uniqueId . ":" . $this->action->id,
+                    'danger',
+                    1
+                );
+            }
+
             Yii::$app->getSession()->setFlash(
                 'danger',
                 Yii::t(
