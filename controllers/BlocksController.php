@@ -110,18 +110,12 @@ class BlocksController extends Controller
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->save()) {
                     // Log activity
-                    if (
-                        class_exists('\wdmg\activity\models\Activity') &&
-                        $this->module->moduleLoaded('activity') &&
-                        isset(Yii::$app->activity)
-                    ) {
-                        Yii::$app->activity->set(
-                            'New content block `' . $model->title . '` with ID `' . $model->id . '` has been successfully added.',
-                            $this->uniqueId . ":" . $this->action->id,
-                            'success',
-                            1
-                        );
-                    }
+                    $this->module->logActivity(
+                        'New content block `' . $model->title . '` with ID `' . $model->id . '` has been successfully added.',
+                        $this->uniqueId . ":" . $this->action->id,
+                        'success',
+                        1
+                    );
 
                     Yii::$app->getSession()->setFlash(
                         'success',
@@ -130,18 +124,12 @@ class BlocksController extends Controller
                     return $this->redirect(['blocks/index']);
                 } else {
                     // Log activity
-                    if (
-                        class_exists('\wdmg\activity\models\Activity') &&
-                        $this->module->moduleLoaded('activity') &&
-                        isset(Yii::$app->activity)
-                    ) {
-                        Yii::$app->activity->set(
-                            'An error occurred while add the content block: ' . $model->title,
-                            $this->uniqueId . ":" . $this->action->id,
-                            'danger',
-                            1
-                        );
-                    }
+                    $this->module->logActivity(
+                        'An error occurred while add the content block: ' . $model->title,
+                        $this->uniqueId . ":" . $this->action->id,
+                        'danger',
+                        1
+                    );
 
                     Yii::$app->getSession()->setFlash(
                         'danger',
@@ -173,18 +161,12 @@ class BlocksController extends Controller
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->save()) {
                     // Log activity
-                    if (
-                        class_exists('\wdmg\activity\models\Activity') &&
-                        $this->module->moduleLoaded('activity') &&
-                        isset(Yii::$app->activity)
-                    ) {
-                        Yii::$app->activity->set(
-                            'Content block `' . $model->title . '` with ID `' . $model->id . '` has been successfully updated.',
-                            $this->uniqueId . ":" . $this->action->id,
-                            'success',
-                            1
-                        );
-                    }
+                    $this->module->logActivity(
+                        'Content block `' . $model->title . '` with ID `' . $model->id . '` has been successfully updated.',
+                        $this->uniqueId . ":" . $this->action->id,
+                        'success',
+                        1
+                    );
 
                     Yii::$app->getSession()->setFlash(
                         'success',
@@ -199,18 +181,12 @@ class BlocksController extends Controller
                     return $this->redirect(['blocks/index']);
                 } else {
                     // Log activity
-                    if (
-                        class_exists('\wdmg\activity\models\Activity') &&
-                        $this->module->moduleLoaded('activity') &&
-                        isset(Yii::$app->activity)
-                    ) {
-                        Yii::$app->activity->set(
-                            'An error occurred while update the content block `' . $model->title . '` with ID `' . $model->id . '`.',
-                            $this->uniqueId . ":" . $this->action->id,
-                            'danger',
-                            1
-                        );
-                    }
+                    $this->module->logActivity(
+                        'An error occurred while update the content block `' . $model->title . '` with ID `' . $model->id . '`.',
+                        $this->uniqueId . ":" . $this->action->id,
+                        'danger',
+                        1
+                    );
 
                     Yii::$app->getSession()->setFlash(
                         'danger',
@@ -237,18 +213,12 @@ class BlocksController extends Controller
         $model = $this->findModel($id);
         if ($model->delete()) {
             // Log activity
-            if (
-                class_exists('\wdmg\activity\models\Activity') &&
-                $this->module->moduleLoaded('activity') &&
-                isset(Yii::$app->activity)
-            ) {
-                Yii::$app->activity->set(
-                    'Content block `' . $model->title . '` with ID `' . $model->id . '` has been successfully deleted.',
-                    $this->uniqueId . ":" . $this->action->id,
-                    'success',
-                    1
-                );
-            }
+            $this->module->logActivity(
+                'Content block `' . $model->title . '` with ID `' . $model->id . '` has been successfully deleted.',
+                $this->uniqueId . ":" . $this->action->id,
+                'success',
+                1
+            );
 
             Yii::$app->getSession()->setFlash(
                 'success',
@@ -262,18 +232,12 @@ class BlocksController extends Controller
             );
         } else {
             // Log activity
-            if (
-                class_exists('\wdmg\activity\models\Activity') &&
-                $this->module->moduleLoaded('activity') &&
-                isset(Yii::$app->activity)
-            ) {
-                Yii::$app->activity->set(
-                    'An error occurred while deleting the content block `' . $model->title . '` with ID `' . $model->id . '`.',
-                    $this->uniqueId . ":" . $this->action->id,
-                    'danger',
-                    1
-                );
-            }
+            $this->module->logActivity(
+                'An error occurred while deleting the content block `' . $model->title . '` with ID `' . $model->id . '`.',
+                $this->uniqueId . ":" . $this->action->id,
+                'danger',
+                1
+            );
 
             Yii::$app->getSession()->setFlash(
                 'danger',
