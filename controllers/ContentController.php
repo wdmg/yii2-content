@@ -113,7 +113,7 @@ class ContentController extends Controller
         $block = Blocks::findModel(intval($block_id));
         $fields = Fields::find()->where(['block_id' => $block_id])->orderBy('sort_order')->asArray()->all();
         $attributes = ArrayHelper::getColumn($fields, 'name');
-        $model = new \wdmg\base\DynamicModel($attributes);
+        $model = new \wdmg\base\models\DynamicModel($attributes);
 
         // Add validation rules according to field types
         foreach ($fields as $field) {
@@ -260,7 +260,7 @@ class ContentController extends Controller
         $block = Blocks::findModel(intval($block_id));
         $fields = Fields::find()->where(['block_id' => $block_id])->orderBy('sort_order')->asArray()->all();
         $attributes = ArrayHelper::getColumn($fields, 'name');
-        $model = new \wdmg\base\DynamicModel($attributes);
+        $model = new \wdmg\base\models\DynamicModel($attributes);
 
         // Add validation rules according to field types
         foreach ($fields as $field) {

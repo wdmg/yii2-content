@@ -1,6 +1,10 @@
 Changelog
 =========
 
+## 1.0.4 (2020-04-14)
+ * Update dependencies
+ * Change namespace of DynamicModel
+ 
 ## 1.0.3 (2020-03-31)
  * Refactoring log of activity
  * Log activity
