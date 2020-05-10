@@ -45,6 +45,7 @@ return [
     'Block' => 'Блок',
     'Field' => 'Поле',
     'Actions' => 'Действия',
+    'All types' => 'Все типы',
 
     'Content block has been successfully added!' => "Блок контента был успешно добавлен!",
     'Content list has been successfully added!' => "Список контента был успешно добавлен!",
@@ -76,7 +77,9 @@ return [
     'Delete content' => 'Удалить контент',
     'Are you sure you want to delete this content?' => 'Вы действительно желаете удалить этот контент?',
 
+    'Fields list' => 'Список полей',
     'Fields for: {title}' => 'Поля для: {title}',
+    'Add field' => 'Добавить поле',
     'Add new field' => 'Добавить новое поле',
     'Create a field' => 'Создание поля',
     'Field: {label}' => 'Поле: {label}',
@@ -111,5 +114,26 @@ return [
     'OK! Content for `{title}` successfully deleted.' => "OK! Контент для `{title}` был успешно удалён.",
     'An error occurred while deleting a row of list `{title}`.' => "Произошла ошибка при удалении строки списка `{title}`.",
     'An error occurred while deleting a content for `{title}`.' => "Произошла ошибка при удалении контента для `{title}`.",
+
+    'Version of list: {title}' => "Языковая версия списка: {title}",
+    'Version of block: {title}' => "Языковая версия блока: {title}",
+    'Version of field: {label}' => "Языковая версия поля: {label}",
+
+    'Language version' => "Языковая версия",
+    'Language versions' => "Языковые версии",
+    'No display language has been set. Source language will be selected: {language}' => 'Не задан язык отображения. Будет выбран исходный язык: {language}',
+    'View' => "Просмотр",
+    'Edit' => "Изменить",
+    'Delete' => "Удалить",
+    'Source version: {language}' => "Исходная версия: {language}",
+    'Edit source version: {language}' => "Изменить исходную версию: {language}",
+    'Add source version: {language}' => "Добавить исходную версию: {language}",
+    'View source version: {language}' => "Смотреть исходную версию: {language}",
+    'Delete source version: {language}' => "Удалить исходную версию: {language}",
+    'Language version: {language}' => "Языковая версия: {language}",
+    'Edit language version: {language}' => "Изменить языковую версию: {language}",
+    'Add language version: {language}' => "Добавить языковую версию: {language}",
+    'View language version: {language}' => "Смотреть языковую версию: {language}",
+    'Delete language version: {language}' => "Удалить языковую версию: {language}",
 
 ];

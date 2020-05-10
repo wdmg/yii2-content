@@ -2,15 +2,14 @@
 
 namespace wdmg\content\models;
 
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use wdmg\content\models\Blocks;
+use wdmg\content\models\Fields;
 
 /**
- * BlocksSearch represents the model behind the search form of `wdmg\content\models\Blocks`.
+ * FieldsSearch represents the model behind the search form of `app\vendor\wdmg\content\models\Fields`.
  */
-class BlocksSearch extends Blocks
+class FieldsSearch extends Fields
 {
     /**
      * {@inheritdoc}
@@ -18,11 +17,10 @@ class BlocksSearch extends Blocks
     public function rules()
     {
         return [
-            [['id'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['id', 'block_id', 'type'], 'integer'],
+            [['label', 'name', 'locale', 'created_at', 'updated_at'], 'safe'],
         ];
     }
-
     /**
      * {@inheritdoc}
      */
@@ -36,16 +34,12 @@ class BlocksSearch extends Blocks
      * Creates data provider instance with search query applied
      *
      * @param array $params
-     * @param array $cond
      *
      * @return ActiveDataProvider
      */
-    public function search($params, $cond)
+    public function search($params, $block_id = null)
     {
-        if (!is_null($cond))
-            $query = Blocks::find()->where($cond);
-        else
-            $query = Blocks::find();
+        $query = Fields::find();
 
         // add conditions that should always apply here
         $dataProvider = new ActiveDataProvider([
@@ -68,14 +62,19 @@ class BlocksSearch extends Blocks
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
-            'title' => $this->title,
-            'alias' => $this->alias,
-            'status' => $this->status,
+            'block_id' => (!is_null($block_id)) ? $block_id : $this->block_id,
             'created_at' => $this->created_at,
-            'created_by' => $this->created_by,
             'updated_at' => $this->updated_at,
-            'updated_by' => $this->updated_by
         ]);
+
+        $query->andFilterWhere(['like', 'name', $this->name])
+            ->andFilterWhere(['like', 'label', $this->label]);
+
+        if ($this->type !== "*")
+            $query->andFilterWhere(['like', 'type', $this->type]);
+
+        if ($this->locale !== "*")
+            $query->andFilterWhere(['like', 'locale', $this->locale]);
 
         return $dataProvider;
     }

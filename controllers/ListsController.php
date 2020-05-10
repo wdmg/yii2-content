@@ -4,10 +4,11 @@ namespace wdmg\content\controllers;
 
 use Yii;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use \yii\helpers\ArrayHelper;
-use \yii\data\ArrayDataProvider;
+use yii\helpers\ArrayHelper;
+use yii\data\ArrayDataProvider;
 use wdmg\content\models\Blocks;
 use wdmg\content\models\BlocksSearch;
 
@@ -16,6 +17,17 @@ use wdmg\content\models\BlocksSearch;
  */
 class ListsController extends Controller
 {
+
+    /**
+     * @var string|null Selected language (locale)
+     */
+    private $_locale;
+
+    /**
+     * @var string|null Selected id of source
+     */
+    private $_source_id;
+
     /**
      * {@inheritdoc}
      */
@@ -53,6 +65,16 @@ class ListsController extends Controller
         }
 
         return $behaviors;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeAction($action)
+    {
+        $this->_locale = Yii::$app->request->get('locale', null);
+        $this->_source_id = Yii::$app->request->get('source_id', null);
+        return parent::beforeAction($action);
     }
 
     /**
@@ -97,6 +119,42 @@ class ListsController extends Controller
     {
         $model = new Blocks();
         $model->type = $model::CONTENT_BLOCK_TYPE_LIST;
+
+        // No language is set for this model, we will use the current user language
+        if (is_null($model->locale)) {
+            if (is_null($this->_locale)) {
+
+                $model->locale = Yii::$app->sourceLanguage;
+                if (!Yii::$app->request->isPost) {
+
+                    $languages = $model->getLanguagesList(false);
+                    Yii::$app->getSession()->setFlash(
+                        'danger',
+                        Yii::t(
+                            'app/modules/content',
+                            'No display language has been set. Source language will be selected: {language}',
+                            [
+                                'language' => (isset($languages[Yii::$app->sourceLanguage])) ? $languages[Yii::$app->sourceLanguage] : Yii::$app->sourceLanguage
+                            ]
+                        )
+                    );
+                }
+            } else {
+                $model->locale = $this->_locale;
+            }
+        }
+
+        $source = null;
+        if (!is_null($this->_source_id)) {
+            $model->source_id = $this->_source_id;
+            if ($source = $model::findOne(['id' => $this->_source_id])) {
+                if ($source->id) {
+                    $model->source_id = $source->id;
+                    $model->alias = $source->alias;
+                }
+            }
+        }
+
         if (Yii::$app->request->isAjax) {
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->validate())
@@ -142,6 +200,7 @@ class ListsController extends Controller
 
         return $this->render('create', [
             'module' => $this->module,
+            'source' => $source,
             'model' => $model
         ]);
 
@@ -150,6 +209,32 @@ class ListsController extends Controller
     public function actionUpdate($id)
     {
         $model = self::findModel($id);
+        if (!is_null($model->source_id) && is_null($model->alias)) {
+            if ($source = $model::findOne(['id' => $model->source_id])) {
+                $model->alias = $source->alias;
+            }
+        }
+
+        // No language is set for this model, we will use the current user language
+        if (is_null($model->locale)) {
+
+            $model->locale = Yii::$app->sourceLanguage;
+            if (!Yii::$app->request->isPost) {
+
+                $languages = $model->getLanguagesList(false);
+                Yii::$app->getSession()->setFlash(
+                    'danger',
+                    Yii::t(
+                        'app/modules/content',
+                        'No display language has been set. Source language will be selected: {language}',
+                        [
+                            'language' => (isset($languages[Yii::$app->sourceLanguage])) ? $languages[Yii::$app->sourceLanguage] : Yii::$app->sourceLanguage
+                        ]
+                    )
+                );
+            }
+        }
+
         if (Yii::$app->request->isAjax) {
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->validate())
@@ -256,7 +341,7 @@ class ListsController extends Controller
     }
 
     /**
-     * Finds the Newsletters model based on its primary key value.
+     * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
      * @return ActiveRecord model
@@ -264,8 +349,13 @@ class ListsController extends Controller
      */
     protected function findModel($id)
     {
-        if (($model = Blocks::findOne(['id' => $id, 'type' => Blocks::CONTENT_BLOCK_TYPE_LIST])) !== null)
+
+        if (is_null($this->_locale) && ($model = Blocks::findOne(['id' => $id, 'type' => Blocks::CONTENT_BLOCK_TYPE_LIST])) !== null) {
             return $model;
+        } else {
+            if (($model = Blocks::findOne(['source_id' => $id, 'locale' => $this->_locale, 'type' => Blocks::CONTENT_BLOCK_TYPE_LIST])) !== null)
+                return $model;
+        }
 
         throw new NotFoundHttpException(Yii::t('app/modules/content', 'The requested list does not exist.'));
     }

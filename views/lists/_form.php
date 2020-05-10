@@ -1,5 +1,6 @@
 <?php
 
+use wdmg\widgets\LangSwitcher;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use wdmg\widgets\SelectInput;
@@ -9,12 +10,30 @@ use wdmg\widgets\SelectInput;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 <div class="content-lists-form">
+    <?php
+        echo LangSwitcher::widget([
+            'label' => Yii::t('app/modules/content', 'Language version'),
+            'model' => $model,
+            'renderWidget' => 'button-group',
+            'createRoute' => 'lists/create',
+            'updateRoute' => 'lists/update',
+            'supportLocales' => $this->context->module->supportLocales,
+            'versions' => (isset($model->source_id)) ? $model->getAllVersions($model->source_id, true) : $model->getAllVersions($model->id, true),
+            'options' => [
+                'id' => 'locale-switcher',
+                'class' => 'pull-right'
+            ]
+        ]);
+    ?>
     <?php $form = ActiveForm::begin([
         'id' => "addListForm",
         'enableAjaxValidation' => true
     ]); ?>
     <?= $form->field($model, 'title'); ?>
-    <?= $form->field($model, 'alias')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'alias')->textInput([
+        'disabled' => ($model->source_id) ? true : false,
+        'maxlength' => true
+    ]) ?>
     <?= $form->field($model, 'description')->textarea(['rows' => 2]) ?>
     <?= $form->field($model, 'status')->widget(SelectInput::class, [
         'items' => $model->getStatusesList(false),
@@ -25,7 +44,7 @@ use wdmg\widgets\SelectInput;
     <hr/>
     <div class="form-group">
         <?= Html::a(Yii::t('app/modules/content', '&larr; Back to list'), ['lists/index'], ['class' => 'btn btn-default pull-left']) ?>&nbsp;
-        <?= Html::submitButton(Yii::t('app/modules/content', 'Save'), ['class' => 'btn btn-success pull-right']) ?>
+        <?= Html::submitButton(Yii::t('app/modules/content', 'Save'), ['class' => 'btn btn-save btn-success pull-right']) ?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>

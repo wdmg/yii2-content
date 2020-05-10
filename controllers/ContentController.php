@@ -2,9 +2,9 @@
 
 namespace wdmg\content\controllers;
 
-use wdmg\content\models\Items;
 use Yii;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
@@ -13,12 +13,24 @@ use yii\data\ActiveDataProvider;
 use wdmg\content\models\Blocks;
 use wdmg\content\models\Fields;
 use wdmg\content\models\Content;
+use wdmg\content\models\Items;
 
 /**
  * ContentController implements the CRUD actions.
  */
 class ContentController extends Controller
 {
+
+    /**
+     * @var string|null Selected language (locale)
+     */
+    private $_locale;
+
+    /**
+     * @var string|null Selected id of source
+     */
+    private $_source_id;
+
     /**
      * {@inheritdoc}
      */
@@ -56,6 +68,16 @@ class ContentController extends Controller
         }
 
         return $behaviors;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeAction($action)
+    {
+        $this->_locale = Yii::$app->request->get('locale', null);
+        $this->_source_id = Yii::$app->request->get('source_id', null);
+        return parent::beforeAction($action);
     }
 
     public function actionIndex($block_id)
@@ -114,6 +136,30 @@ class ContentController extends Controller
         $fields = Fields::find()->where(['block_id' => $block_id])->orderBy('sort_order')->asArray()->all();
         $attributes = ArrayHelper::getColumn($fields, 'name');
         $model = new \wdmg\base\models\DynamicModel($attributes);
+
+        // No language is set for this model, we will use the current user language
+        if (is_null($model->locale)) {
+            if (is_null($this->_locale)) {
+
+                $model->locale = Yii::$app->sourceLanguage;
+                if (!Yii::$app->request->isPost) {
+
+                    $languages = $model->getLanguagesList(false);
+                    Yii::$app->getSession()->setFlash(
+                        'danger',
+                        Yii::t(
+                            'app/modules/content',
+                            'No display language has been set. Source language will be selected: {language}',
+                            [
+                                'language' => (isset($languages[Yii::$app->sourceLanguage])) ? $languages[Yii::$app->sourceLanguage] : Yii::$app->sourceLanguage
+                            ]
+                        )
+                    );
+                }
+            } else {
+                $model->locale = $this->_locale;
+            }
+        }
 
         // Add validation rules according to field types
         foreach ($fields as $field) {
@@ -261,6 +307,26 @@ class ContentController extends Controller
         $fields = Fields::find()->where(['block_id' => $block_id])->orderBy('sort_order')->asArray()->all();
         $attributes = ArrayHelper::getColumn($fields, 'name');
         $model = new \wdmg\base\models\DynamicModel($attributes);
+
+        // No language is set for this model, we will use the current user language
+        if (is_null($model->locale)) {
+
+            $model->locale = Yii::$app->sourceLanguage;
+            if (!Yii::$app->request->isPost) {
+
+                $languages = $model->getLanguagesList(false);
+                Yii::$app->getSession()->setFlash(
+                    'danger',
+                    Yii::t(
+                        'app/modules/content',
+                        'No display language has been set. Source language will be selected: {language}',
+                        [
+                            'language' => (isset($languages[Yii::$app->sourceLanguage])) ? $languages[Yii::$app->sourceLanguage] : Yii::$app->sourceLanguage
+                        ]
+                    )
+                );
+            }
+        }
 
         // Add validation rules according to field types
         foreach ($fields as $field) {
@@ -521,7 +587,7 @@ class ContentController extends Controller
     }
 
     /**
-     * Finds the Newsletters model based on its primary key value.
+     * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
      * @param integer $block_id
@@ -530,9 +596,14 @@ class ContentController extends Controller
      */
     protected function findModel($id, $block_id = null)
     {
-        if (($model = Content::findOne(['id' => $id, 'block_id' => $block_id])) !== null)
-            return $model;
 
-        throw new NotFoundHttpException(Yii::t('app/modules/content', 'The requested filed does not exist.'));
+        if (is_null($this->_locale) && ($model = Content::findOne(['id' => $id, 'block_id' => $block_id])) !== null) {
+            return $model;
+        } else {
+            if (($model = Content::findOne(['source_id' => $id, 'block_id' => $block_id, 'locale' => $this->_locale])) !== null)
+                return $model;
+        }
+
+        throw new NotFoundHttpException(Yii::t('app/modules/content', 'The requested content does not exist.'));
     }
 }

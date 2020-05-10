@@ -2,6 +2,10 @@ Changelog
 =========
 
 ## 1.*
+ * CRUD for languages versions
+ * SluggableBehavior for Fields name
+ * Added flags and language labels
+ * Added migrations
  * Start of multi-language support: added migrations
  
 ## 1.0.4 (2020-04-14)

@@ -8,7 +8,7 @@ $this->title = Yii::t('app/modules/content', 'Updating list: {title}', [
     'title' => $model->title,
 ]);
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Content lists'), 'url' => ['lists/index']];
-$this->params['breadcrumbs'][] = Yii::t('app/modules/pages', 'Edit list');
+$this->params['breadcrumbs'][] = Yii::t('app/modules/content', 'Edit list');
 
 ?>
 <div class="page-header">

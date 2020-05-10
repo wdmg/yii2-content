@@ -1,5 +1,6 @@
 <?php
 
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -13,6 +14,12 @@ use yii\bootstrap\Modal;
 
 $this->title = Yii::t('app/modules/content', 'Content blocks');
 $this->params['breadcrumbs'][] = $this->title;
+
+if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsset')) {
+    $bundle = \wdmg\translations\FlagsAsset::register(Yii::$app->view);
+} else {
+    $bundle = false;
+}
 
 ?>
 <div class="page-header">
@@ -64,15 +71,28 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     }
 
-                    $html .= Html::a(
-                        Yii::t('app/modules/content', 'Edit') . '&nbsp;<span class="glyphicon glyphicon-edit"></span>',
-                        Url::toRoute(['fields/index', 'block_id' => $data->id]),
-                        [
-                            'class' => 'btn btn-link btn-sm btn-block',
-                            'title' => Yii::t('app/modules/content', 'Edit fields'),
-                            'data-pjax' => '0'
-                        ]
-                    );
+                    if ($data->getFieldsCount()) {
+                        $html .= Html::a(
+                            Yii::t('app/modules/content', 'Edit'),
+                            Url::toRoute(['fields/index', 'block_id' => $data->id]),
+                            [
+                                'class' => 'btn btn-link btn-edit btn-sm btn-block',
+                                'title' => Yii::t('app/modules/content', 'Edit fields'),
+                                'data-pjax' => '0'
+                            ]
+                        );
+                    } else {
+                        $html .= Html::a(
+                            Yii::t('app/modules/content', 'Add field'),
+                            Url::toRoute(['fields/create', 'block_id' => $data->id]),
+                            [
+                                'class' => 'btn btn-link btn-add btn-sm btn-block',
+                                'title' => Yii::t('app/modules/content', 'Add field'),
+                                'data-pjax' => '0'
+                            ]
+                        );
+                    }
+
                     return $html;
                 }
             ],
@@ -83,29 +103,145 @@ $this->params['breadcrumbs'][] = $this->title;
                     $html = '';
 
                     $html .= Html::a(
-                        Yii::t('app/modules/content', 'Edit') . '&nbsp;<span class="glyphicon glyphicon-edit"></span>',
-                        Url::toRoute(['content/index', 'block_id' => $data->id]),
+                        Yii::t('app/modules/content', 'Edit'),
+                        ($data->getContentCount()) ?
+                            Url::toRoute(['content/index', 'block_id' => $data->id]) :
+                            '#',
                         [
-                            'class' => 'btn btn-link btn-sm btn-block',
+                            'class' => 'btn btn-link btn-edit btn-sm btn-block',
                             'title' => Yii::t('app/modules/content', 'Edit content'),
+                            'disabled' => ($data->getContentCount()) ? false : true,
                             'data-pjax' => '0'
                         ]
                     );
 
-                    $html .= Html::a(
-                        Yii::t('app/modules/content', 'Preview') . '&nbsp;<span class="glyphicon glyphicon-eye-open"></span>',
-                        Url::toRoute(['blocks/view', 'id' => $data->id]),
-                        [
-                            'class' => 'btn btn-link btn-sm btn-block content-preview-link',
-                            'title' => Yii::t('app/modules/content', 'Content preview'),
-                            'data-toggle' => 'modal',
-                            'data-target' => '#contentPreview',
-                            'data-id' => $data->id,
-                            'data-pjax' => '0'
-                        ]
-                    );
+                    if ($data->getContentCount()) {
+                        $html .= Html::a(
+                            Yii::t('app/modules/content', 'Preview'),
+                            Url::toRoute(['blocks/view', 'id' => $data->id]),
+                            [
+                                'class' => 'btn btn-link btn-sm btn-view btn-block content-preview-link',
+                                'title' => Yii::t('app/modules/content', 'Content preview'),
+                                'data-toggle' => 'modal',
+                                'data-target' => '#contentPreview',
+                                'data-id' => $data->id,
+                                'data-pjax' => '0'
+                            ]
+                        );
+                    }
 
                     return $html;
+                }
+            ],
+            [
+                'attribute' => 'locale',
+                'label' => Yii::t('app/modules/content','Language versions'),
+                'format' => 'raw',
+                'filter' => false,
+                'headerOptions' => [
+                    'class' => 'text-center',
+                    'style' => 'min-width:96px;'
+                ],
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
+                'value' => function($data) use ($bundle) {
+
+                    $output = [];
+                    $separator = ", ";
+                    $versions = $data->getAllVersions($data->id, true);
+                    $locales = ArrayHelper::map($versions, 'id', 'locale');
+
+                    if (isset(Yii::$app->translations)) {
+                        foreach ($locales as $item_locale) {
+
+                            $locale = Yii::$app->translations->parseLocale($item_locale, Yii::$app->language);
+
+                            if ($item_locale === $locale['locale']) { // Fixing default locale from PECL intl
+
+                                if (!($country = $locale['domain']))
+                                    $country = '_unknown';
+
+                                $flag = \yii\helpers\Html::img($bundle->baseUrl . '/flags-iso/flat/24/' . $country . '.png', [
+                                    'alt' => $locale['name']
+                                ]);
+
+                                if ($data->locale === $locale['locale']) // It`s source version
+                                    $output[] = Html::a($flag,
+                                        [
+                                            'blocks/update', 'id' => $data->id
+                                        ], [
+                                            'title' => Yii::t('app/modules/content','Edit source version: {language}', [
+                                                'language' => $locale['name']
+                                            ])
+                                        ]
+                                    );
+                                else  // Other localization versions
+                                    $output[] = Html::a($flag,
+                                        [
+                                            'blocks/update', 'id' => $data->id,
+                                            'locale' => $locale['locale']
+                                        ], [
+                                            'title' => Yii::t('app/modules/content','Edit language version: {language}', [
+                                                'language' => $locale['name']
+                                            ])
+                                        ]
+                                    );
+
+                            }
+
+                        }
+                        $separator = "";
+                    } else {
+                        foreach ($locales as $locale) {
+                            if (!empty($locale)) {
+
+                                if (extension_loaded('intl'))
+                                    $language = mb_convert_case(trim(\Locale::getDisplayLanguage($locale, Yii::$app->language)), MB_CASE_TITLE, "UTF-8");
+                                else
+                                    $language = $locale;
+
+                                if ($data->locale === $locale) // It`s source version
+                                    $output[] = Html::a($language,
+                                        [
+                                            'blocks/update', 'id' => $data->id
+                                        ], [
+                                            'title' => Yii::t('app/modules/content','Edit source version: {language}', [
+                                                'language' => $language
+                                            ])
+                                        ]
+                                    );
+                                else  // Other localization versions
+                                    $output[] = Html::a($language,
+                                        [
+                                            'blocks/update', 'id' => $data->id,
+                                            'locale' => $locale
+                                        ], [
+                                            'title' => Yii::t('app/modules/content','Edit language version: {language}', [
+                                                'language' => $language
+                                            ])
+                                        ]
+                                    );
+                            }
+                        }
+                    }
+
+
+                    if (is_countable($output)) {
+                        if (count($output) > 0) {
+                            $onMore = false;
+                            if (count($output) > 3)
+                                $onMore = true;
+
+                            if ($onMore)
+                                return join(array_slice($output, 0, 3), $separator) . "&nbsp;…";
+                            else
+                                return join($separator, $output);
+
+                        }
+                    }
+
+                    return null;
                 }
             ],
             [
@@ -182,7 +318,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $output;
                 }
             ],
-            [
+            /*[
                 'class' => 'yii\grid\ActionColumn',
                 'header' => Yii::t('app/modules/content', 'Actions'),
                 'contentOptions' => [
@@ -202,7 +338,285 @@ $this->params['breadcrumbs'][] = $this->title;
                         ]);
                     },
                 ]
-            ],
+            ],*/
+
+            [
+                'class' => 'yii\grid\ActionColumn',
+                'header' => Yii::t('app/modules/content','Actions'),
+                'headerOptions' => [
+                    'class' => 'text-center'
+                ],
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ],
+                'buttons'=> [
+                    'view' => function($url, $data, $key) {
+                        $output = [];
+                        $versions = $data->getAllVersions($data->id, true);
+                        $locales = ArrayHelper::map($versions, 'id', 'locale');
+                        if (isset(Yii::$app->translations)) {
+                            foreach ($locales as $item_locale) {
+                                $locale = Yii::$app->translations->parseLocale($item_locale, Yii::$app->language);
+                                if ($item_locale === $locale['locale']) { // Fixing default locale from PECL intl
+
+                                    if ($data->locale === $locale['locale']) // It`s source version
+                                        $output[] = Html::a(Yii::t('app/modules/content','Preview of source version: {language}', [
+                                            'language' => $locale['name']
+                                        ]), ['blocks/view', 'id' => $data->id], [
+                                            'class' => 'content-preview-link',
+                                            'title' => Yii::t('app/modules/content', 'Content preview'),
+                                            'data-toggle' => 'modal',
+                                            'data-target' => '#contentPreview',
+                                            'data-id' => $data->id,
+                                            'data-pjax' => '0'
+                                        ]);
+                                    else  // Other localization versions
+                                        $output[] = Html::a(Yii::t('app/modules/content','Preview of language version: {language}', [
+                                            'language' => $locale['name']
+                                        ]), ['blocks/view', 'id' => $data->id, 'locale' => $locale['locale']], [
+                                            'class' => 'content-preview-link',
+                                            'title' => Yii::t('app/modules/content', 'Content preview'),
+                                            'data-toggle' => 'modal',
+                                            'data-target' => '#contentPreview',
+                                            'data-id' => $data->id,
+                                            'data-pjax' => '0'
+                                        ]);
+
+                                }
+                            }
+                        } else {
+                            foreach ($locales as $locale) {
+                                if (!empty($locale)) {
+
+                                    if (extension_loaded('intl'))
+                                        $language = mb_convert_case(trim(\Locale::getDisplayLanguage($locale, Yii::$app->language)), MB_CASE_TITLE, "UTF-8");
+                                    else
+                                        $language = $locale;
+
+                                    if ($data->locale === $locale) // It`s source version
+                                        $output[] = Html::a(Yii::t('app/modules/content','Preview of version: {language}', [
+                                            'language' => $language
+                                        ]), ['blocks/view', 'id' => $data->id], [
+                                            'class' => 'content-preview-link',
+                                            'title' => Yii::t('app/modules/content', 'Content preview'),
+                                            'data-toggle' => 'modal',
+                                            'data-target' => '#contentPreview',
+                                            'data-id' => $data->id,
+                                            'data-pjax' => '0'
+                                        ]);
+                                    else  // Other localization versions
+                                        $output[] = Html::a(Yii::t('app/modules/content','Preview of version: {language}', [
+                                            'language' => $language
+                                        ]), ['blocks/view', 'id' => $data->id, 'locale' => $locale], [
+                                            'class' => 'content-preview-link',
+                                            'title' => Yii::t('app/modules/content', 'Content preview'),
+                                            'data-toggle' => 'modal',
+                                            'data-target' => '#contentPreview',
+                                            'data-id' => $data->id,
+                                            'data-pjax' => '0'
+                                        ]);
+
+                                }
+                            }
+                        }
+
+                        if (is_countable($output)) {
+                            if (count($output) > 1) {
+                                $html = '';
+                                $html .= '<div class="btn-group">';
+                                $html .= Html::a(
+                                    '<span class="glyphicon glyphicon-eye-open"></span> ' .
+                                    Yii::t('app/modules/content', 'View') .
+                                    ' <span class="caret"></span>',
+                                    '#',
+                                    [
+                                        'class' => "btn btn-block btn-link btn-xs dropdown-toggle",
+                                        'data-toggle' => "dropdown",
+                                        'aria-haspopup' => "true",
+                                        'aria-expanded' => "false"
+                                    ]);
+                                $html .= '<ul class="dropdown-menu dropdown-menu-right">';
+                                $html .= '<li>' . implode("</li><li>", $output) . '</li>';
+                                $html .= '</ul>';
+                                $html .= '</div>';
+                                return $html;
+                            }
+                        }
+
+                        $url = Url::toRoute(['blocks/view', 'id' => $key]);
+                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
+                            'class' => 'content-preview-link',
+                            'title' => Yii::t('app/modules/content', 'Content preview'),
+                            'data-toggle' => 'modal',
+                            'data-target' => '#contentPreview',
+                            'data-id' => $key,
+                            'data-pjax' => '0'
+                        ]);
+                    },
+                    'update' => function($url, $data, $key) {
+                        $output = [];
+                        $versions = $data->getAllVersions($data->id, true);
+                        $locales = ArrayHelper::map($versions, 'id', 'locale');
+                        if (isset(Yii::$app->translations)) {
+                            foreach ($locales as $item_locale) {
+                                $locale = Yii::$app->translations->parseLocale($item_locale, Yii::$app->language);
+                                if ($item_locale === $locale['locale']) { // Fixing default locale from PECL intl
+
+                                    if ($data->locale === $locale['locale']) // It`s source version
+                                        $output[] = Html::a(Yii::t('app/modules/content','Edit source version: {language}', [
+                                            'language' => $locale['name']
+                                        ]), ['blocks/update', 'id' => $data->id]);
+                                    else  // Other localization versions
+                                        $output[] = Html::a(Yii::t('app/modules/content','Edit language version: {language}', [
+                                            'language' => $locale['name']
+                                        ]), ['blocks/update', 'id' => $data->id, 'locale' => $locale['locale']]);
+
+                                }
+                            }
+                        } else {
+                            foreach ($locales as $locale) {
+                                if (!empty($locale)) {
+
+                                    if (extension_loaded('intl'))
+                                        $language = mb_convert_case(trim(\Locale::getDisplayLanguage($locale, Yii::$app->language)), MB_CASE_TITLE, "UTF-8");
+                                    else
+                                        $language = $locale;
+
+                                    if ($data->locale === $locale) // It`s source version
+                                        $output[] = Html::a(Yii::t('app/modules/content','Edit source version: {language}', [
+                                            'language' => $language
+                                        ]), ['blocks/update', 'id' => $data->id]);
+                                    else  // Other localization versions
+                                        $output[] = Html::a(Yii::t('app/modules/content','Edit language version: {language}', [
+                                            'language' => $language
+                                        ]), ['blocks/update', 'id' => $data->id, 'locale' => $locale]);
+
+                                }
+                            }
+                        }
+
+                        if (is_countable($output)) {
+                            if (count($output) > 1) {
+                                $html = '';
+                                $html .= '<div class="btn-group">';
+                                $html .= Html::a(
+                                    '<span class="glyphicon glyphicon-pencil"></span> ' .
+                                    Yii::t('app/modules/content', 'Edit') .
+                                    ' <span class="caret"></span>',
+                                    '#',
+                                    [
+                                        'class' => "btn btn-block btn-link btn-xs dropdown-toggle",
+                                        'data-toggle' => "dropdown",
+                                        'aria-haspopup' => "true",
+                                        'aria-expanded' => "false"
+                                    ]);
+                                $html .= '<ul class="dropdown-menu dropdown-menu-right">';
+                                $html .= '<li>' . implode("</li><li>", $output) . '</li>';
+                                $html .= '</ul>';
+                                $html .= '</div>';
+                                return $html;
+                            }
+                        }
+                        return Html::a('<span class="glyphicon glyphicon-pencil"></span> ' .
+                            Yii::t('app/modules/content', 'Edit'),
+                            [
+                                'blocks/update',
+                                'id' => $data->id
+                            ], [
+                                'class' => 'btn btn-link btn-xs'
+                            ]
+                        );
+                    },
+                    'delete' => function($url, $data, $key) {
+                        $output = [];
+                        $versions = $data->getAllVersions($data->id, true);
+                        $locales = ArrayHelper::map($versions, 'id', 'locale');
+                        if (isset(Yii::$app->translations)) {
+                            foreach ($locales as $item_locale) {
+                                $locale = Yii::$app->translations->parseLocale($item_locale, Yii::$app->language);
+                                if ($item_locale === $locale['locale']) { // Fixing default locale from PECL intl
+
+                                    if ($data->locale === $locale['locale']) // It`s source version
+                                        $output[] = Html::a(Yii::t('app/modules/content','Delete source version: {language}', [
+                                            'language' => $locale['name']
+                                        ]), ['blocks/delete', 'id' => $data->id], [
+                                            'data-method' => 'POST',
+                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete the language version of this block?')
+                                        ]);
+                                    else  // Other localization versions
+                                        $output[] = Html::a(Yii::t('app/modules/content','Delete language version: {language}', [
+                                            'language' => $locale['name']
+                                        ]), ['blocks/delete', 'id' => $data->id, 'locale' => $locale['locale']], [
+                                            'data-method' => 'POST',
+                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete the language version of this block?')
+                                        ]);
+
+                                }
+                            }
+                        } else {
+                            foreach ($locales as $locale) {
+                                if (!empty($locale)) {
+
+                                    if (extension_loaded('intl'))
+                                        $language = mb_convert_case(trim(\Locale::getDisplayLanguage($locale, Yii::$app->language)), MB_CASE_TITLE, "UTF-8");
+                                    else
+                                        $language = $locale;
+
+                                    if ($data->locale === $locale) // It`s source version
+                                        $output[] = Html::a(Yii::t('app/modules/content','Delete source version: {language}', [
+                                            'language' => $language
+                                        ]), ['blocks/delete', 'id' => $data->id], [
+                                            'data-method' => 'POST',
+                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete the language version of this block?')
+                                        ]);
+                                    else  // Other localization versions
+                                        $output[] = Html::a(Yii::t('app/modules/content','Delete language version: {language}', [
+                                            'language' => $language
+                                        ]), ['blocks/delete', 'id' => $data->id, 'locale' => $locale], [
+                                            'data-method' => 'POST',
+                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete the language version of this block?')
+                                        ]);
+
+                                }
+                            }
+                        }
+
+                        if (is_countable($output)) {
+                            if (count($output) > 1) {
+                                $html = '';
+                                $html .= '<div class="btn-group">';
+                                $html .= Html::a(
+                                    '<span class="glyphicon glyphicon-trash"></span> ' .
+                                    Yii::t('app/modules/content', 'Delete') .
+                                    ' <span class="caret"></span>',
+                                    '#',
+                                    [
+                                        'class' => "btn btn-block btn-link btn-xs dropdown-toggle",
+                                        'data-toggle' => "dropdown",
+                                        'aria-haspopup' => "true",
+                                        'aria-expanded' => "false"
+                                    ]);
+                                $html .= '<ul class="dropdown-menu dropdown-menu-right">';
+                                $html .= '<li>' . implode("</li><li>", $output) . '</li>';
+                                $html .= '</ul>';
+                                $html .= '</div>';
+                                return $html;
+                            }
+                        }
+                        return Html::a('<span class="glyphicon glyphicon-trash"></span> ' .
+                            Yii::t('app/modules/content', 'Delete'),
+                            [
+                                'blocks/delete',
+                                'id' => $data->id
+                            ], [
+                                'class' => 'btn btn-link btn-xs',
+                                'data-method' => 'POST',
+                                'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete this block?')
+                            ]
+                        );
+                    }
+                ],
+            ]
         ],
         'pager' => [
             'options' => [
@@ -222,7 +636,7 @@ $this->params['breadcrumbs'][] = $this->title;
     ]); ?>
     <hr/>
     <div>
-        <?= Html::a(Yii::t('app/modules/content', 'Add new block'), ['blocks/create'], ['class' => 'btn btn-success pull-right']) ?>
+        <?= Html::a(Yii::t('app/modules/content', 'Add new block'), ['blocks/create'], ['class' => 'btn btn-add btn-success pull-right']) ?>
     </div>
     <?php Pjax::end(); ?>
 </div>

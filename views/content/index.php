@@ -137,15 +137,15 @@ else
         <div class="btn-group pull-right">
             <?php
             if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
-                echo Html::a(Yii::t('app/modules/content', 'Add new row'), ['content/create', 'block_id' => $block->id], ['class' => 'btn btn-success']);
+                echo Html::a(Yii::t('app/modules/content', 'Add new row'), ['content/create', 'block_id' => $block->id], ['class' => 'btn btn-add btn-success']);
             } else {
                 echo Html::a(Yii::t('app/modules/content', 'Delete content'), ['content/delete', 'block_id' => $block->id], [
-                    'class' => 'btn btn-danger',
+                    'class' => 'btn btn-delete btn-danger',
                     'data' => [
                         'confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete this content?')
                     ]
                 ]);
-                echo Html::a(Yii::t('app/modules/content', 'Edit content'), ['content/update', 'block_id' => $block->id], ['class' => 'btn btn-success']);
+                echo Html::a(Yii::t('app/modules/content', 'Edit content'), ['content/update', 'block_id' => $block->id], ['class' => 'btn btn-add btn-success']);
             }
             ?>
         </div>

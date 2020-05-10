@@ -23,7 +23,7 @@ class m191220_224515_content_fields extends Migration
 
             'block_id' => $this->integer(11),
             'label' => $this->string(45)->notNull(),
-            'name' => $this->string(45)->notNull(),
+            'name' => $this->string(45)->null(),
             'type' => $this->tinyInteger(1)->notNull()->defaultValue(1), // 1 - string, 2 - text, 3 - html
             'sort_order' => $this->integer(2)->notNull()->defaultValue(10), // sort order range
             'params' => $this->text()->null(), // serialized data

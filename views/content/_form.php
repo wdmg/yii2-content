@@ -19,7 +19,7 @@ use yii\widgets\ActiveForm;
     <hr/>
     <div>
         <?= Html::a(Yii::t('app/modules/content', '&larr; Back to list'), ['content/index', 'block_id' => $block->id], ['class' => 'btn btn-default pull-left']) ?>
-        <?= Html::submitButton(Yii::t('app/modules/content', 'Save'), ['class' => 'btn btn-success pull-right']) ?>
+        <?= Html::submitButton(Yii::t('app/modules/content', 'Save'), ['class' => 'btn btn-save btn-success pull-right']) ?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>

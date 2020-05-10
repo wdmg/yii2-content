@@ -1,5 +1,6 @@
 <?php
 
+use wdmg\widgets\LangSwitcher;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use wdmg\widgets\SelectInput;
@@ -9,22 +10,41 @@ use wdmg\widgets\SelectInput;
 /* @var $form yii\widgets\ActiveForm */
 ?>
 <div class="content-fields-form">
+    <?php
+        echo LangSwitcher::widget([
+            'label' => Yii::t('app/modules/content', 'Language version'),
+            'model' => $model,
+            'renderWidget' => 'button-group',
+            'createRoute' => ['fields/create', 'block_id' => $model->block_id],
+            'updateRoute' => ['fields/update', 'block_id' => $model->block_id],
+            'supportLocales' => $this->context->module->supportLocales,
+            'versions' => (isset($model->source_id)) ? $model->getAllVersions($model->source_id, true) : $model->getAllVersions($model->id, true),
+            'options' => [
+                'id' => 'locale-switcher',
+                'class' => 'pull-right'
+            ]
+        ]);
+    ?>
     <?php $form = ActiveForm::begin([
         'id' => "fieldForm",
         'enableAjaxValidation' => true
     ]); ?>
     <?= $form->field($model, 'label'); ?>
-    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+    <?= $form->field($model, 'name')->textInput([
+            'disabled' => ($model->source_id) ? true : false,
+            'maxlength' => true
+    ]) ?>
     <?= $form->field($model, 'type')->widget(SelectInput::class, [
         'items' => $model->getTypesList(false),
         'options' => [
+            'disabled' => ($model->source_id) ? true : false,
             'class' => 'form-control'
         ]
     ]); ?>
     <hr/>
     <div class="form-group">
         <?= Html::a(Yii::t('app/modules/content', '&larr; Back to list'), ['fields/index', 'block_id' => $block->id], ['class' => 'btn btn-default pull-left']) ?>
-        <?= Html::submitButton(Yii::t('app/modules/content', 'Save'), ['class' => 'btn btn-success pull-right']) ?>
+        <?= Html::submitButton(Yii::t('app/modules/content', 'Save'), ['class' => 'btn btn-save btn-success pull-right']) ?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>
@@ -41,8 +61,8 @@ $(document).ready(function() {
                     data: form.serializeArray(),
                 }
             ).done(function(data) {
-                if (data.alias && form.find('#fields-name').val().length == 0) {
-                    form.find('#fields-name').val(data.alias);
+                if (data.name && form.find('#fields-name').val().length == 0) {
+                    form.find('#fields-name').val(data.name);
                     form.yiiActiveForm('validateAttribute', 'fields-name');
                 }
             });

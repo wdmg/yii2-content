@@ -23,7 +23,7 @@ class m191220_223044_content_blocks extends Migration
 
             'title' => $this->string(64)->notNull(),
             'description' => $this->string(255)->null(),
-            'alias' => $this->string(64)->unique()->notNull(),
+            'alias' => $this->string(64)->null(),
             'fields' => $this->text()->null(), // serialized data of content fields
             'type' => $this->tinyInteger(1)->notNull()->defaultValue(1), // 1 - block, 2 - list
             'status' => $this->tinyInteger(1)->null()->defaultValue(0), // 0 - draft, 1 - published

@@ -14,7 +14,7 @@ else
     $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Content blocks'), 'url' => ['blocks/index']];
 
 $this->params['breadcrumbs'][] = ['label' => $block->title, 'url' => ['fields/index', 'block_id' => $block->id]];
-$this->params['breadcrumbs'][] = $this->title;
+$this->params['breadcrumbs'][] = $model->label;
 
 ?>
 <div class="page-header">

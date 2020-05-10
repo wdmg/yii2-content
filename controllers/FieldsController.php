@@ -2,20 +2,33 @@
 
 namespace wdmg\content\controllers;
 
-use wdmg\content\models\Blocks;
 use Yii;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\data\ActiveDataProvider;
 use wdmg\content\models\Fields;
+use wdmg\content\models\Blocks;
+use wdmg\content\models\FieldsSearch;
 
 /**
  * FieldsController implements the CRUD actions.
  */
 class FieldsController extends Controller
 {
+
+    /**
+     * @var string|null Selected language (locale)
+     */
+    private $_locale;
+
+    /**
+     * @var string|null Selected id of source
+     */
+    private $_source_id;
+
     /**
      * {@inheritdoc}
      */
@@ -55,27 +68,72 @@ class FieldsController extends Controller
         return $behaviors;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeAction($action)
+    {
+        $this->_locale = Yii::$app->request->get('locale', null);
+        $this->_source_id = Yii::$app->request->get('source_id', null);
+        return parent::beforeAction($action);
+    }
+
     public function actionIndex($block_id)
     {
         $block = Blocks::findModel(intval($block_id));
-        $model = new Fields();
-        $query = $model::find()->where(['block_id' => intval($block_id)]);
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+        $searchModel = new FieldsSearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams, $block_id);
 
         return $this->render('index', [
-            'model' => $model,
+            'model' => $searchModel,
             'block' => $block,
             'dataProvider' => $dataProvider,
             'module' => $this->module
         ]);
     }
 
-    public function actionCreate($block_id)
+    public function actionCreate($block_id = null)
     {
         $model = new Fields();
+
+        $source = null;
+        if (!is_null($this->_source_id) && $source = Fields::findOne(['id' => $this->_source_id])) {
+            $model->source_id = $source->id;
+            $model->name = $source->name;
+            $model->type = $source->type;
+
+            if (is_null($block_id)) {
+                $block_id = $source->block_id;
+            }
+        }
+
         $block = Blocks::findModel(intval($block_id));
+        $model->block_id = $block_id;
+
+        // No language is set for this model, we will use the current user language
+        if (is_null($model->locale)) {
+            if (is_null($this->_locale)) {
+
+                $model->locale = Yii::$app->sourceLanguage;
+                if (!Yii::$app->request->isPost) {
+
+                    $languages = $model->getLanguagesList(false);
+                    Yii::$app->getSession()->setFlash(
+                        'danger',
+                        Yii::t(
+                            'app/modules/content',
+                            'No display language has been set. Source language will be selected: {language}',
+                            [
+                                'language' => (isset($languages[Yii::$app->sourceLanguage])) ? $languages[Yii::$app->sourceLanguage] : Yii::$app->sourceLanguage
+                            ]
+                        )
+                    );
+                }
+            } else {
+                $model->locale = $this->_locale;
+            }
+        }
+
         if (Yii::$app->request->isAjax) {
             if ($model->load(Yii::$app->request->post())) {
 
@@ -87,10 +145,12 @@ class FieldsController extends Controller
                 return $this->asJson(['success' => $success, 'name' => $model->name, 'errors' => $model->errors]);
             }
         } else {
-            if ($model->load(Yii::$app->request->post())) {
+
+            if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+
                 $sort_order = Fields::find()->where(['block_id' => $block->id])->max('sort_order');
-                $model->block_id = $block->id;
                 $model->sort_order = intval($sort_order) + 10;
+
                 if ($model->save()) {
                     // Log activity
                     $this->module->logActivity(
@@ -125,14 +185,45 @@ class FieldsController extends Controller
         return $this->render('create', [
             'module' => $this->module,
             'model' => $model,
+            'source' => $source,
             'block' => $block
         ]);
     }
 
-    public function actionUpdate($id, $block_id)
+    public function actionUpdate($id, $block_id = null)
     {
         $block = Blocks::findModel(intval($block_id));
-        $model = self::findModel($id, $block_id);
+
+        if (is_null($block_id) && !is_null($this->_source_id))
+            $block_id = $this->_source_id;
+
+        $model = self::findModel(intval($id), intval($block_id));
+        if (!is_null($model->source_id) && is_null($model->name)) {
+            if ($source = $model::findOne(['id' => $model->source_id])) {
+                $model->name = $source->name;
+            }
+        }
+
+        // No language is set for this model, we will use the current user language
+        if (is_null($model->locale)) {
+
+            $model->locale = Yii::$app->sourceLanguage;
+            if (!Yii::$app->request->isPost) {
+
+                $languages = $model->getLanguagesList(false);
+                Yii::$app->getSession()->setFlash(
+                    'danger',
+                    Yii::t(
+                        'app/modules/content',
+                        'No display language has been set. Source language will be selected: {language}',
+                        [
+                            'language' => (isset($languages[Yii::$app->sourceLanguage])) ? $languages[Yii::$app->sourceLanguage] : Yii::$app->sourceLanguage
+                        ]
+                    )
+                );
+            }
+        }
+
         if (Yii::$app->request->isAjax) {
             if ($model->load(Yii::$app->request->post())) {
                 if ($model->validate())
@@ -240,7 +331,7 @@ class FieldsController extends Controller
     }
 
     /**
-     * Finds the Newsletters model based on its primary key value.
+     * Finds the model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
      * @param integer $id
      * @param integer $block_id
@@ -249,9 +340,23 @@ class FieldsController extends Controller
      */
     protected function findModel($id, $block_id = null)
     {
-        if (($model = Fields::findOne(['id' => $id, 'block_id' => $block_id])) !== null)
-            return $model;
 
-        throw new NotFoundHttpException(Yii::t('app/modules/content', 'The requested filed does not exist.'));
+        if (!is_null($block_id)) {
+            if (is_null($this->_locale) && ($model = Fields::findOne(['id' => $id, 'block_id' => $block_id])) !== null) {
+                return $model;
+            } else {
+                if (($model = Fields::findOne(['source_id' => $id, 'block_id' => $block_id, 'locale' => $this->_locale])) !== null)
+                    return $model;
+            }
+        } else {
+            if (is_null($this->_locale) && ($model = Fields::findOne(['id' => $id])) !== null) {
+                return $model;
+            } else {
+                if (($model = Fields::findOne(['source_id' => $id, 'locale' => $this->_locale])) !== null)
+                    return $model;
+            }
+        }
+
+        throw new NotFoundHttpException(Yii::t('app/modules/content', 'The requested field does not exist.'));
     }
 }

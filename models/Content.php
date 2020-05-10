@@ -4,23 +4,27 @@ namespace wdmg\content\models;
 
 use Yii;
 use yii\db\Expression;
-use yii\db\ActiveRecord;
+//use yii\db\ActiveRecord;
+use wdmg\base\models\ActiveRecordML;
 use yii\behaviors\TimestampBehavior;
 use yii\behaviors\BlameableBehavior;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "{{%content}}".
  *
  * @property int $id
+ * @property int $source_id
  * @property int $field_id
  * @property int $block_id
  * @property string $content
+ * @property string $locale
  * @property string $created_at
  * @property integer $created_by
  * @property string $updated_at
  * @property integer $updated_by
  */
-class Content extends ActiveRecord
+class Content extends ActiveRecordML
 {
 
     public $block;
@@ -42,8 +46,8 @@ class Content extends ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => 'created_at',
-                    ActiveRecord::EVENT_BEFORE_UPDATE => 'updated_at',
+                    self::EVENT_BEFORE_INSERT => 'created_at',
+                    self::EVENT_BEFORE_UPDATE => 'updated_at',
                 ],
                 'value' => new Expression('NOW()'),
             ],
@@ -54,7 +58,7 @@ class Content extends ActiveRecord
             ]
         ];
 
-        return $behaviors;
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
@@ -73,7 +77,7 @@ class Content extends ActiveRecord
             $rules[] = [['created_by', 'updated_by'], 'safe'];
         }
 
-        return $rules;
+        return ArrayHelper::merge(parent::rules(), $rules);
     }
 
     /**
@@ -83,11 +87,13 @@ class Content extends ActiveRecord
     {
         return [
             'id' => Yii::t('app/modules/content', 'ID'),
+            'source_id' => Yii::t('app/modules/content', 'Source ID'),
             'field' => Yii::t('app/modules/content', 'Field'),
             'field_id' => Yii::t('app/modules/content', 'Field ID'),
             'block' => Yii::t('app/modules/content', 'Block'),
             'block_id' => Yii::t('app/modules/content', 'Block ID'),
             'content' => Yii::t('app/modules/content', 'Content'),
+            'locale' => Yii::t('app/modules/content', 'Locale'),
             'created_at' => Yii::t('app/modules/content', 'Created at'),
             'created_by' => Yii::t('app/modules/content', 'Created by'),
             'updated_at' => Yii::t('app/modules/content', 'Updated at'),

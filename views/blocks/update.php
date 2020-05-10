@@ -8,7 +8,7 @@ $this->title = Yii::t('app/modules/content', 'Updating block: {title}', [
     'title' => $model->title,
 ]);
 $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Content blocks'), 'url' => ['blocks/index']];
-$this->params['breadcrumbs'][] = Yii::t('app/modules/pages', 'Edit block');
+$this->params['breadcrumbs'][] = Yii::t('app/modules/content', 'Edit block');
 
 ?>
 <div class="page-header">
