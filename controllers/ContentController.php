@@ -88,7 +88,7 @@ class ContentController extends Controller
         $block = Blocks::findModel(intval($block_id));
 
         // Preparing dynamic columns for GridView
-        $fields = ArrayHelper::map($block->getFields(), 'name', 'label', 'sort_order');
+        $fields = ArrayHelper::map($block->getFields(null, ($this->_locale) ? $this->_locale : $block->locale, true), 'name', 'label', 'sort_order');
         foreach (array_values($fields) as $field) {
             foreach ($field as $attribute => $label) {
                 $columns[$attribute] = [
@@ -100,7 +100,7 @@ class ContentController extends Controller
 
         // Make a selection of content, depending on the type (block or list), the selection logic changes
         if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
-            $rows = $block->getListContent($block->id, true);
+            $rows = $block->getListContent($block->id, ($this->_locale) ? $this->_locale : $block->locale, true);
             $data = ArrayHelper::map($rows, 'name', 'content', 'row_order');
             $items = array_keys($data);
             $data = array_values($data);
@@ -114,16 +114,22 @@ class ContentController extends Controller
                 ],
             ]);
         } else {
-            $query = $model::find()->where(['block_id' => intval($block_id)]);
+            $query = $model::find()->where(['block_id' => intval($block_id), 'locale' => ($this->_locale) ? $this->_locale : $block->locale]);
             $dataProvider = new ActiveDataProvider([
                 'query' => $query,
             ]);
         }
 
+        // Fake Content instance for Language Switcher
+        $content = new Content();
+        $content->block_id = $block->id;
+        $content->locale = ($this->_locale) ? $this->_locale : $block->locale;
+
         return $this->render('index', [
             'model' => $model,
             'items' => $items,
             'block' => $block,
+            'content' => $content,
             'columns' => $columns,
             'dataProvider' => $dataProvider,
             'module' => $this->module
@@ -297,8 +303,14 @@ class ContentController extends Controller
             }
         }
 
+        // Fake Content instance for Language Switcher
+        $content = new Content();
+        $content->block_id = $block->id;
+        $content->locale = ($this->_locale) ? $this->_locale : $block->locale;
+
         return $this->render('create', [
             'model' => $model,
+            'content' => $content,
             'block' => $block,
             'module' => $this->module
         ]);
@@ -498,9 +510,15 @@ class ContentController extends Controller
             }
         }
 
+        // Fake Content instance for Language Switcher
+        $content = new Content();
+        $content->block_id = $block->id;
+        $content->locale = ($this->_locale) ? $this->_locale : $block->locale;
+
         return $this->render('update', [
             'model' => $model,
             'block' => $block,
+            'content' => $content,
             'module' => $this->module
         ]);
 

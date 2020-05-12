@@ -12,12 +12,12 @@ use yii\widgets\ActiveForm;
     <?php
         echo LangSwitcher::widget([
             'label' => Yii::t('app/modules/content', 'Language version'),
-            'model' => $block,
+            'model' => $content,
             'renderWidget' => 'button-group',
-            'createRoute' => ['content/create', 'block_id' => $block->id],
-            'updateRoute' => ['content/update', 'block_id' => $block->id],
+            'createRoute' => ['content/update', 'block_id' => $content->block_id],
+            'updateRoute' => ['content/update', 'block_id' => $content->block_id],
             'supportLocales' => $this->context->module->supportLocales,
-            'versions' => (isset($block->source_id)) ? $block->getAllVersions($block->source_id, true) : $block->getAllVersions($block->id, true),
+            'versions' => $content->getAllVersions(),
             'options' => [
                 'id' => 'locale-switcher',
                 'class' => 'pull-right'

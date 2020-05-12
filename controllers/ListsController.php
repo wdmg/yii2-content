@@ -92,11 +92,16 @@ class ListsController extends Controller
         ]);
     }
 
-    public function actionView($id)
+    public function actionView($id, $locale = null)
     {
-        $model = self::findModel($id);
-        $rows = $model->getListContent($model->id, $this->_locale, true);
-        $data = ArrayHelper::map($rows, 'name', 'content', 'row_order');
+        $this->_locale = null;
+        $model = self::findModel($id, $locale);
+
+        if (is_null($locale))
+            $locale = $model->locale;
+
+        $rows = $model->getListContent($model->id, $locale, true);
+        $data = ArrayHelper::map($rows, 'label', 'content', 'row_order');
         $data = array_values($data);
         $dataProvider = new ArrayDataProvider([
             'allModels' => $data,

@@ -292,7 +292,7 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                                             'language' => $locale['name']
                                         ]), ['fields/delete', 'id' => $data->id, 'block_id' => $block->id], [
                                             'data-method' => 'POST',
-                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete the language version of this field?')
+                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete this field?')
                                         ]);
                                     else  // Other localization versions
                                         $output[] = Html::a(Yii::t('app/modules/content','Delete language version: {language}', [
@@ -318,7 +318,7 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                                             'language' => $language
                                         ]), ['fields/delete', 'id' => $data->id, 'block_id' => $block->id], [
                                             'data-method' => 'POST',
-                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete the language version of this field?')
+                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete this field?')
                                         ]);
                                     else  // Other localization versions
                                         $output[] = Html::a(Yii::t('app/modules/content','Delete language version: {language}', [

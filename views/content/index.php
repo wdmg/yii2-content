@@ -1,5 +1,6 @@
 <?php
 
+use wdmg\widgets\LangSwitcher;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ListView;
@@ -40,7 +41,28 @@ else
 <div class="content-content-index">
     <?php Pjax::begin(); ?>
     <?php
+        echo LangSwitcher::widget([
+            'label' => Yii::t('app/modules/content', 'Language version'),
+            'model' => $content,
+            'renderWidget' => 'button-group',
+            'createRoute' => ['content/index', 'block_id' => $content->block_id],
+            'updateRoute' => ['content/index', 'block_id' => $content->block_id],
+            'supportLocales' => $this->context->module->supportLocales,
+            'versions' => $content->getAllVersions(),
+            'options' => [
+                'id' => 'locale-switcher',
+                'class' => 'pull-right'
+            ]
+        ]);
+    ?>
+    <?php
         if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
+
+            foreach ($columns as $key => $column) {
+                $columns[$key]['encodeLabel'] = false;
+                $columns[$key]['label'] = $column['label'] . ' <span class="text-muted">[' . $column['attribute'] . ']</span>';
+            }
+
             echo GridView::widget([
                 'dataProvider' => $dataProvider,
                 'layout' => '{summary}<br\/>{items}<br\/>{summary}<br\/><div class="text-center">{pager}</div>',
@@ -98,12 +120,12 @@ else
                     [
                         'attribute' => 'field',
                         'filter' => true,
+                        'format' => 'html',
                         'value' => function($data) {
-                            if ($data->field->label) {
-                                return $data->field->label;
-                            } else {
+                            if ($data->field->label)
+                                return $data->field->label . ' <span class="text-muted">[' . $data->field->name . ']</span>';
+                            else
                                 return $data->field_id;
-                            }
                         }
                     ],
                     'content'
@@ -139,13 +161,15 @@ else
             if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
                 echo Html::a(Yii::t('app/modules/content', 'Add new row'), ['content/create', 'block_id' => $block->id], ['class' => 'btn btn-add btn-success']);
             } else {
-                echo Html::a(Yii::t('app/modules/content', 'Delete content'), ['content/delete', 'block_id' => $block->id], [
-                    'class' => 'btn btn-delete btn-danger',
-                    'data' => [
-                        'confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete this content?')
-                    ]
-                ]);
-                echo Html::a(Yii::t('app/modules/content', 'Edit content'), ['content/update', 'block_id' => $block->id], ['class' => 'btn btn-add btn-success']);
+                if ($block->getContentCount()) {
+                    echo Html::a(Yii::t('app/modules/content', 'Delete content'), ['content/delete', 'block_id' => $block->id], [
+                        'class' => 'btn btn-delete btn-danger',
+                        'data' => [
+                            'confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete this content?')
+                        ]
+                    ]);
+                }
+                echo Html::a(Yii::t('app/modules/content', 'Edit content'), ['content/update', 'block_id' => $block->id], ['class' => 'btn btn-edit btn-primary']);
             }
             ?>
         </div>

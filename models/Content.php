@@ -28,6 +28,7 @@ class Content extends ActiveRecordML
 {
 
     public $block;
+    public $source_id;
 
     /**
      * {@inheritdoc}
@@ -68,7 +69,7 @@ class Content extends ActiveRecordML
     {
         $rules = [
             [['field_id', 'block_id', 'content'], 'required'],
-            [['field_id', 'block_id', 'source_id'], 'integer'],
+            [['field_id', 'block_id'], 'integer'],
             ['content', 'string'],
             [['created_at', 'updated_at'], 'safe'],
         ];
@@ -107,27 +108,5 @@ class Content extends ActiveRecordML
     public function getField()
     {
         return $this->hasOne(Fields::class, ['id' => 'field_id']);
-    }
-
-    /**
-     * @return object of \yii\db\ActiveQuery
-     */
-    public function getCreatedBy()
-    {
-        if (class_exists('\wdmg\users\models\Users'))
-            return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'created_by']);
-        else
-            return $this->created_by;
-    }
-
-    /**
-     * @return object of \yii\db\ActiveQuery
-     */
-    public function getUpdatedBy()
-    {
-        if (class_exists('\wdmg\users\models\Users'))
-            return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'updated_by']);
-        else
-            return $this->updated_by;
     }
 }

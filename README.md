@@ -53,12 +53,13 @@ To get the content you may use the component method Yii::$app->content->get() wi
         if ($block = Yii::$app->content->get(1)) {
             
             // Raw output
-            echo $block['contact-email']; // where `contact-email` as filed name
-            echo $block['contact-phone']; // where `contact-phone` as filed name
+            echo $block['adress']; // where `adress` as filed name
+            echo $block['phone']; // where `phone` as filed name
+            echo $block['email']; // where `email` as filed name
             
             // With ListView and ArrayDataProvider
             $dataProvider = new \yii\data\ArrayDataProvider([
-                'allModels' => Yii::$app->content->get(2)
+                'allModels' => $block
             ]);
             echo yii\widgets\ListView::widget([
                 'dataProvider' => $dataProvider,
@@ -74,17 +75,17 @@ To get the content you may use the component method Yii::$app->content->get() wi
 **Content list**
 
     <?php
-        if ($list = Yii::$app->content->get('test-table')) {
+        if ($list = Yii::$app->content->get('our-team', 'ru-RU')) {
             
             // Raw output
             foreach ($list as $row) {
-                echo $row['contact-email']; // where `contact-email` as filed name
-                echo $row['contact-phone']; // where `contact-phone` as filed name
+                echo $row['first_name']; // where `first_name` as filed name
+                echo $row['last_name']; // where `last_name` as filed name
             }
             
             // With GridView and ArrayDataProvider
             $dataProvider = new \yii\data\ArrayDataProvider([
-                'allModels' => Yii::$app->content->get('test-table')
+                'allModels' => $list
             ]);
             echo \yii\grid\GridView::widget([
                 'dataProvider' => $dataProvider,
@@ -108,6 +109,7 @@ Use the `Module::dashboardNavItems()` method of the module to generate a navigat
     ?>
 
 # Status and version [ready to use]
+* v.1.1.0 - Multi-language support
 * v.1.0.4 - Change namespace of DynamicModel
 * v.1.0.3 - Log activity
 * v.1.0.2 - Added pagination, up to date dependencies

@@ -1,7 +1,8 @@
 Changelog
 =========
 
-## 1.*
+## 1.1.0 (2020-05-13)
+ * Added demo data
  * CRUD for languages versions
  * SluggableBehavior for Fields name
  * Added flags and language labels

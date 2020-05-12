@@ -10,7 +10,7 @@ use yii\widgets\ListView;
     'dataProvider' => $dataProvider,
     'layout' => '<dl class="dl-horizontal">{items}</dl>{pager}',
     'itemView' => function($data, $key, $index, $widget) use ($model) {
-        return "<dt>" . $model->generateAttributeLabel($data["name"]) . "</dt>" . "<dd>" . $data["content"] . "</dd>";
+        return '<dt>' . $data['label'] . ' <span class="text-muted">[' . $data['name'] . ']</span></dt>' . '<dd>' . $data['content'] . '</dd>';
     }
 ]); ?>
 <?php Pjax::end(); ?>

@@ -7,7 +7,7 @@ namespace wdmg\content\components;
  * Yii2 Content component
  *
  * @category        Content
- * @version         1.0.4
+ * @version         1.1.0
  * @author          Alexsander Vyshnyvetskyy <alex.vyshnyvetskyy@gmail.com>
  * @link            https://github.com/wdmg/yii2-content
  * @copyright       Copyright (c) 2019 - 2020 W.D.M.Group, Ukraine
@@ -24,9 +24,14 @@ class Content extends Component
 {
 
     /**
+     * Returns a block or list of content by ID or alias.
      *
+     * @param null $id
+     * @param null $locale
+     * @param bool $rawContent
+     * @return array|mixed|null
      */
-    public function get($id = null, $locale = null)
+    public function get($id = null, $locale = null, $rawContent = false)
     {
         if (is_null($id))
             return null;
@@ -37,12 +42,18 @@ class Content extends Component
         if ($model = Blocks::findModel($id)) {
             if ($model->type == Blocks::CONTENT_BLOCK_TYPE_LIST) {
                 $rows = $model->getListContent($model->id, $locale, true);
-                $data = ArrayHelper::map($rows, 'name', 'content', 'row_order');
-                return array_values($data);
+                if (!$rawContent) {
+                    $data = ArrayHelper::map($rows, 'name', 'content', 'row_order');
+                    return array_values($data);
+                }
+                return $rows;
             } else if ($model->type == Blocks::CONTENT_BLOCK_TYPE_ONCE) {
                 $rows = $model->getBlockContent($model->id, $locale, true);
-                $data = ArrayHelper::map($rows, 'name', 'content', 'field_order');
-                return array_reduce($data, 'array_merge', []);
+                if (!$rawContent) {
+                    $data = ArrayHelper::map($rows, 'name', 'content', 'field_order');
+                    return array_reduce($data, 'array_merge', []);
+                }
+                return $rows;
             }
         }
         return null;

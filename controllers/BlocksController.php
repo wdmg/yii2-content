@@ -94,10 +94,15 @@ class BlocksController extends Controller
     }
 
 
-    public function actionView($id)
+    public function actionView($id, $locale = null)
     {
-        $model = self::findModel($id);
-        $rows = $model->getBlockContent($model->id, $this->_locale, true);
+        $this->_locale = null;
+        $model = self::findModel($id, $locale);
+
+        if (is_null($locale))
+            $locale = $model->locale;
+
+        $rows = $model->getBlockContent($model->id, $locale, true);
         $dataProvider = new \yii\data\ArrayDataProvider([
             'allModels' => $rows,
             'pagination' => [

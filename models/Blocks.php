@@ -155,71 +155,92 @@ class Blocks extends ActiveRecordML
     }
 
     /**
-     * @return array or null
+     * Returns the field (or all available fields) belonging to the
+     * current block/list of content including/without language locale.
+     *
+     * @param null $field_id
+     * @param null $locale
+     * @param bool $asArray
+     * @return array|\yii\db\ActiveRecord[]
      */
-    public function getFields($field_id = null, $asArray = true)
+    public function getFields($field_id = null, $locale = null, $asArray = true)
     {
+        if ($field_id) // One field
+            $fields = Fields::find()->where(['id' => $field_id, 'source_id' => null]);
+        elseif (!is_null($locale)) // All fields (labels in selected locale)
+            $fields = Fields::find()->where(['block_id' => $this->id]);
+        else // All fields (labels in default locale)
+            $fields = Fields::find()->where(['block_id' => $this->id, 'source_id' => null]);
 
-        if ($field_id) {
-            if ($asArray)
-                return Fields::find()->where(['id' => $field_id, 'source_id' => null])->asArray()->all();
-            else
-                return Fields::find()->where(['id' => $field_id, 'source_id' => null])->all();
-        } else {
-            if ($asArray)
-                return Fields::find()->where(['block_id' => $this->id, 'source_id' => null])->asArray()->all();
-            else
-                return Fields::find()->where(['block_id' => $this->id, 'source_id' => null])->all();
-        }
+        if (is_null($locale) && !is_null($this->locale))
+            $fields->andWhere(['locale' => $this->locale]);
+        elseif (!is_null($locale))
+            $fields->andWhere(['locale' => $locale]);
+
+        if ($asArray)
+            return $fields->asArray()->all();
+        else
+            return $fields->all();
     }
 
     /**
-     * @return array or null
+     * Returns items (rows) belonging to a specific content list.
+     *
+     * @param null $block_id
+     * @param bool $asArray
+     * @return array|\yii\db\ActiveRecord[]|null
      */
     public function getItems($block_id = null, $asArray = true)
     {
-
-        if ($block_id && $this->type == self::CONTENT_BLOCK_TYPE_LIST) {
-            if ($asArray)
-                return Items::find()->where(['block_id' => $block_id])->asArray()->all();
-            else
-                return Items::find()->where(['block_id' => $block_id])->all();
-        } elseif ($this->type == self::CONTENT_BLOCK_TYPE_LIST) {
-            if ($asArray)
-                return Items::find()->where(['block_id' => $this->id])->asArray()->all();
-            else
-                return Items::find()->where(['block_id' => $this->id])->all();
-        } else {
+        if ($block_id && $this->type == self::CONTENT_BLOCK_TYPE_LIST)
+            $items = Items::find()->where(['block_id' => $block_id]);
+        elseif ($this->type == self::CONTENT_BLOCK_TYPE_LIST)
+            $items = Items::find()->where(['block_id' => $this->id]);
+        else
             return null;
-        }
+
+        if ($asArray)
+            return $items->asArray()->all();
+        else
+            return $items->all();
     }
 
     /**
-     * @return array or null
+     * Returns content belonging to a specific block/list.
+     *
+     * @param null $ext_id
+     * @param null $block_id
+     * @param bool $asArray
+     * @return array|\yii\db\ActiveRecord[]|null
      */
     public function getContent($ext_id = null, $block_id = null, $asArray = true)
     {
+        if ($ext_id)
+            $content = Content::find()->where(['id' => $ext_id]);
+        else
+            return null;
 
-        if ($ext_id) {
-            if ($block_id) {
-                if ($asArray)
-                    return Content::find()->where(['id' => $ext_id, 'block_id' => $block_id])->asArray()->all();
-                else
-                    return Content::find()->where(['id' => $ext_id, 'block_id' => $block_id])->all();
-            } else {
-                if ($asArray)
-                    return Content::find()->where(['id' => $ext_id, 'block_id' => $this->id])->asArray()->all();
-                else
-                    return Content::find()->where(['id' => $ext_id, 'block_id' => $this->id])->all();
-            }
-        }
-        return null;
+        if ($block_id)
+            $content->andWhere(['block_id' => $block_id]);
+        else
+            $content->andWhere(['block_id' => $this->id]);
+
+        if (!is_null($this->locale))
+            $content->andWhere(['locale' => $this->locale]);
+
+        if ($asArray)
+            return $content->asArray()->all();
+        else
+            return $content->all();
     }
 
     /**
+     * Returns the contents of a content block with/without a language locale.
+     *
      * @param null $id
+     * @param null $locale
      * @param bool $asArray
-     * @return array|null|ActiveRecord
+     * @return array|\yii\db\ActiveRecord[]|null
      */
     public static function getBlockContent($id = null, $locale = null, $asArray = false) {
 
@@ -227,32 +248,25 @@ class Blocks extends ActiveRecordML
             return null;
 
         $query = Content::find()->alias('content')
-            ->select(['fields.sort_order as field_order', 'fields.name', 'content.content', 'fields.type', 'fields.params'])
-            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id` AND `blocks`.`locale` = `content`.`locale`')
-            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id` AND `fields`.`locale` = `content`.`locale`');
+            ->select(['fields.sort_order as field_order', 'fields.label', 'fields.name', 'content.content', 'content.locale', 'fields.type', 'fields.params'])
+            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id`')
+            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id`');
 
         if (is_integer($id)) {
-            if (!is_null($locale)) {
-                $query->where([
-                    'blocks.source_id' => intval($id),
-                    'blocks.locale' => trim($locale)
-                ]);
-            } else {
-                $query->where([
-                    'blocks.id' => intval($id)
-                ]);
-            }
+            $query->where([
+                'blocks.id' => intval($id)
+            ]);
         } elseif (is_string($id)) {
-            if (!is_null($locale)) {
-                $query->where([
-                    'blocks.alias' => trim($id),
-                    'blocks.locale' => trim($locale)
-                ]);
-            } else {
-                $query->where([
-                    'blocks.alias' => trim($id)
-                ]);
-            }
+            $query->where([
+                'blocks.alias' => trim($id)
+            ]);
+        }
+
+        if (!is_null($locale)) {
+            $query->andWhere([
+                'fields.locale' => trim($locale),
+                'content.locale' => trim($locale)
+            ]);
         }
 
         $query->andWhere([
@@ -269,9 +283,12 @@ class Blocks extends ActiveRecordML
     }
 
     /**
+     * Returns the contents of a content list with/without a language locale.
+     *
      * @param null $id
+     * @param null $locale
      * @param bool $asArray
-     * @return array|null|ActiveRecord
+     * @return array|\yii\db\ActiveRecord[]|null
      */
     public static function getListContent($id = null, $locale = null, $asArray = false) {
 
@@ -279,33 +296,26 @@ class Blocks extends ActiveRecordML
             return null;
 
         $query = Content::find()->alias('content')
-            ->select(['items.row_order', 'fields.sort_order as field_order', 'fields.name', 'content.content', 'fields.type', 'fields.params'])
-            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id` AND `blocks`.`locale` = `content`.`locale`')
-            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id` AND `fields`.`locale` = `content`.`locale`')
+            ->select(['fields.label', 'fields.name', 'content.locale', 'content.content', 'fields.type', 'fields.params', 'items.row_order', 'fields.sort_order as field_order'])
+            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id`')
+            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id`')
             ->leftJoin(['items' => Items::tableName()], '`items`.`block_id` = `blocks`.`id` AND `items`.`ext_id` = `content`.`id`');
 
         if (is_integer($id)) {
-            if (!is_null($locale)) {
-                $query->where([
-                    'blocks.source_id' => intval($id),
-                    'blocks.locale' => trim($locale)
-                ]);
-            } else {
-                $query->where([
-                    'blocks.id' => intval($id)
-                ]);
-            }
+            $query->where([
+                'blocks.id' => intval($id)
+            ]);
         } elseif (is_string($id)) {
-            if (!is_null($locale)) {
-                $query->where([
-                    'blocks.alias' => trim($id),
-                    'blocks.locale' => trim($locale)
-                ]);
-            } else {
-                $query->where([
-                    'blocks.alias' => trim($id)
-                ]);
-            }
+            $query->where([
+                'blocks.alias' => trim($id)
+            ]);
+        }
+
+        if (!is_null($locale)) {
+            $query->andWhere([
+                'fields.locale' => trim($locale),
+                'content.locale' => trim($locale)
+            ]);
         }
 
         $query->andWhere([
@@ -313,7 +323,8 @@ class Blocks extends ActiveRecordML
             'blocks.status' => self::CONTENT_BLOCK_STATUS_PUBLISHED
         ]);
 
-        $query->andWhere('`items`.`row_order` != 0');
+        //$query->andWhere('`items`.`row_order` != 0');
+
         $query->orderBy(['items.row_order' => 'ASC', 'fields.sort_order' => 'ASC']);
 
         if ($asArray)
@@ -323,13 +334,28 @@ class Blocks extends ActiveRecordML
 
     }
 
+    /**
+     * Returns a counter of fields for this/or selected block/list.
+     *
+     * @param null $block_id
+     * @return int|string
+     */
     public function getFieldsCount($block_id = null) {
         if (is_null($block_id))
             $block_id = $this->id;
 
-        return Fields::find()->where(['block_id' => $block_id])->count();
+        if (!is_null($this->locale))
+            return Fields::find()->where(['block_id' => $block_id, 'locale' => $this->locale])->count();
+        else
+            return Fields::find()->where(['block_id' => $block_id])->count();
     }
 
+    /**
+     * Returns a counter of content for this/or selected block/list.
+     *
+     * @param null $block_id
+     * @return int|string
+     */
     public function getContentCount($block_id = null) {
         if (is_null($block_id))
             $block_id = $this->id;
@@ -338,29 +364,10 @@ class Blocks extends ActiveRecordML
     }
 
     /**
-     * @return object of \yii\db\ActiveQuery
-     */
-    public function getCreatedBy()
-    {
-        if (class_exists('\wdmg\users\models\Users'))
-            return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'created_by']);
-        else
-            return $this->created_by;
-    }
-
-    /**
-     * @return object of \yii\db\ActiveQuery
-     */
-    public function getUpdatedBy()
-    {
-        if (class_exists('\wdmg\users\models\Users'))
-            return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'updated_by']);
-        else
-            return $this->updated_by;
-    }
-
-    /**
-     * @return array of list
+     * Returns an array of block/content list publishing statuses.
+     *
+     * @param bool $allStatuses
+     * @return array
      */
     public function getStatusesList($allStatuses = false)
     {
@@ -378,8 +385,9 @@ class Blocks extends ActiveRecordML
     }
 
     /**
-     * Finds the Newsletters model based on its primary key value.
+     * Finds the model based on its primary key value.
      * If the model is not found, null will be returned.
+     *
      * @param integer/string $id_or_alias
      * @return ActiveRecord model or null
      */

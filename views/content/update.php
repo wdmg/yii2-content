@@ -27,9 +27,6 @@ if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type)
 else
     $this->params['breadcrumbs'][] = Yii::t('app/modules/content', 'Content editor');
 
-
-
-
 ?>
 <div class="page-header">
     <h1><?= Html::encode($this->title) ?> <small class="text-muted pull-right">[v.<?= $module->version ?>]</small></h1>
@@ -37,6 +34,7 @@ else
 <div class="content-content-update">
     <?= $this->render('_form', [
         'model' => $model,
+        'content' => $content,
         'block' => $block
     ]); ?>
 </div>

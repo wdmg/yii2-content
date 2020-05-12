@@ -546,7 +546,7 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                                             'language' => $locale['name']
                                         ]), ['lists/delete', 'id' => $data->id], [
                                             'data-method' => 'POST',
-                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete the language version of this list?')
+                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete this list?')
                                         ]);
                                     else  // Other localization versions
                                         $output[] = Html::a(Yii::t('app/modules/content','Delete language version: {language}', [
@@ -572,7 +572,7 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                                             'language' => $language
                                         ]), ['lists/delete', 'id' => $data->id], [
                                             'data-method' => 'POST',
-                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete the language version of this list?')
+                                            'data-confirm' => Yii::t('app/modules/content', 'Are you sure you want to delete this list?')
                                         ]);
                                     else  // Other localization versions
                                         $output[] = Html::a(Yii::t('app/modules/content','Delete language version: {language}', [
