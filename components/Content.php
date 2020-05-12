@@ -26,18 +26,21 @@ class Content extends Component
     /**
      *
      */
-    public function get($id = null)
+    public function get($id = null, $locale = null)
     {
         if (is_null($id))
             return null;
 
+        if (is_null($locale))
+            $locale = Yii::$app->language;
+
         if ($model = Blocks::findModel($id)) {
             if ($model->type == Blocks::CONTENT_BLOCK_TYPE_LIST) {
-                $rows = $model->getListContent($model->id, true);
+                $rows = $model->getListContent($model->id, $locale, true);
                 $data = ArrayHelper::map($rows, 'name', 'content', 'row_order');
                 return array_values($data);
             } else if ($model->type == Blocks::CONTENT_BLOCK_TYPE_ONCE) {
-                $rows = $model->getBlockContent($model->id, true);
+                $rows = $model->getBlockContent($model->id, $locale, true);
                 $data = ArrayHelper::map($rows, 'name', 'content', 'field_order');
                 return array_reduce($data, 'array_merge', []);
             }

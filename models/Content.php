@@ -68,7 +68,7 @@ class Content extends ActiveRecordML
     {
         $rules = [
             [['field_id', 'block_id', 'content'], 'required'],
-            [['field_id', 'block_id'], 'integer'],
+            [['field_id', 'block_id', 'source_id'], 'integer'],
             ['content', 'string'],
             [['created_at', 'updated_at'], 'safe'],
         ];

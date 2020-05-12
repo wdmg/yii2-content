@@ -113,47 +113,38 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                 'value' => function($data) {
                     $html = '';
 
-                    $html .= Html::a(
-                        Yii::t('app/modules/content', 'Edit'),
-                        ($data->getContentCount()) ?
-                            Url::toRoute(['content/index', 'block_id' => $data->id]) :
-                            '#',
-                        [
-                            'class' => 'btn btn-link btn-edit btn-sm btn-block',
-                            'title' => Yii::t('app/modules/content', 'Edit content'),
-                            'disabled' => ($data->getContentCount()) ? false : true,
-                            'data-pjax' => '0'
-                        ]
-                    );
-
-                    $html .= Html::a(
-                        Yii::t('app/modules/content', 'Preview'),
-                        ($data->getContentCount()) ?
-                            Url::toRoute(['lists/view', 'id' => $data->id]) :
-                            '#',
-                        [
-                            'class' => 'btn btn-link btn-view btn-sm btn-block content-preview-link',
-                            'title' => Yii::t('app/modules/content', 'Content preview'),
-                            'disabled' => ($data->getContentCount()) ? false : true,
-                            'data-toggle' => ($data->getContentCount()) ? 'modal' : false,
-                            'data-target' => ($data->getContentCount()) ? '#contentPreview' : false,
-                            'data-id' => $data->id,
-                            'data-pjax' => '0'
-                        ]
-                    );
-
-
-
                     if ($data->getContentCount()) {
+                        $html .= Html::a(
+                            Yii::t('app/modules/content', 'Edit'),
+                            Url::toRoute(['content/index', 'block_id' => $data->id]),
+                            [
+                                'class' => 'btn btn-link btn-edit btn-sm btn-block',
+                                'title' => Yii::t('app/modules/content', 'Edit content'),
+                                'data-pjax' => '0'
+                            ]
+                        );
                         $html .= Html::a(
                             Yii::t('app/modules/content', 'Preview'),
                             Url::toRoute(['lists/view', 'id' => $data->id]),
                             [
-                                'class' => 'btn btn-link btn-sm btn-view btn-block content-preview-link',
+                                'class' => 'btn btn-link btn-view btn-sm btn-block content-preview-link',
                                 'title' => Yii::t('app/modules/content', 'Content preview'),
                                 'data-toggle' => 'modal',
                                 'data-target' => '#contentPreview',
                                 'data-id' => $data->id,
+                                'data-pjax' => '0'
+                            ]
+                        );
+                    } else {
+                        $html .= Html::a(
+                            Yii::t('app/modules/content', 'Add content'),
+                            ($data->getFieldsCount()) ?
+                                Url::toRoute(['content/create', 'block_id' => $data->id]) :
+                                '#',
+                            [
+                                'class' => 'btn btn-link btn-add btn-sm btn-block',
+                                'title' => Yii::t('app/modules/content', 'Add content'),
+                                'disabled' => ($data->getFieldsCount()) ? false : true,
                                 'data-pjax' => '0'
                             ]
                         );
@@ -427,21 +418,23 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                             }
                         }
 
-                        if (is_countable($output)) {
+                        if (is_countable($output) && $data->getContentCount() && $data->getFieldsCount()) {
                             if (count($output) > 1) {
                                 $html = '';
                                 $html .= '<div class="btn-group">';
                                 $html .= Html::a(
                                     '<span class="glyphicon glyphicon-eye-open"></span> ' .
-                                    Yii::t('app/modules/content', 'View') .
+                                    Yii::t('app/modules/content', 'Preview') .
                                     ' <span class="caret"></span>',
                                     '#',
                                     [
                                         'class' => "btn btn-block btn-link btn-xs dropdown-toggle",
+                                        'disabled' => ($data->getContentCount() && $data->getFieldsCount()) ? false : true,
                                         'data-toggle' => "dropdown",
                                         'aria-haspopup' => "true",
                                         'aria-expanded' => "false"
                                     ]);
+
                                 $html .= '<ul class="dropdown-menu dropdown-menu-right">';
                                 $html .= '<li>' . implode("</li><li>", $output) . '</li>';
                                 $html .= '</ul>';
@@ -450,15 +443,20 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                             }
                         }
 
-                        $url = Url::toRoute(['lists/view', 'id' => $key]);
-                        return Html::a('<span class="glyphicon glyphicon-eye-open"></span>', $url, [
-                            'class' => 'content-preview-link',
-                            'title' => Yii::t('app/modules/content', 'Content preview'),
-                            'data-toggle' => 'modal',
-                            'data-target' => '#contentPreview',
-                            'data-id' => $key,
-                            'data-pjax' => '0'
-                        ]);
+                        if ($data->getContentCount() && $data->getFieldsCount()) {
+                            $url = Url::toRoute(['lists/view', 'id' => $key]);
+                            return Html::a('<span class="glyphicon glyphicon-eye-open"></span> ' .
+                                Yii::t('app/modules/content', 'Preview'),
+                                $url, [
+                                    'class' => 'btn btn-link btn-xs content-preview-link',
+                                    'title' => Yii::t('app/modules/content', 'Content preview'),
+                                    'data-toggle' => 'modal',
+                                    'data-target' => '#contentPreview',
+                                    'data-id' => $key,
+                                    'data-pjax' => '0'
+                                ]
+                            );
+                        }
                     },
                     'update' => function($url, $data, $key) {
                         $output = [];

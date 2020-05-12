@@ -12,16 +12,18 @@ use yii\bootstrap\Modal;
 /* @var $searchModel wdmg\content\models\BlocksSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-$this->title = Yii::t('app/modules/content', 'Fields for: {title}', [
-    'title' => $block->title
-]);
-
 if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Content lists'), 'url' => ['fields/index']];
-    $this->params['breadcrumbs'][] = ['label' => $block->title, 'url' => ['fields/index', 'block_id' => $block->id]];
+    $this->title = Yii::t('app/modules/content', 'List fields: {title}', [
+        'title' => $block->title
+    ]);
+    $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Content lists'), 'url' => ['lists/index']];
+    $this->params['breadcrumbs'][] = ['label' => $block->title, 'url' => ['lists/update', 'id' => $block->id]];
 } else {
-    $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Content blocks'), 'url' => ['fields/index']];
-    $this->params['breadcrumbs'][] = ['label' => $block->title, 'url' => ['blocks/index', 'block_id' => $block->id]];
+    $this->title = Yii::t('app/modules/content', 'Block fields: {title}', [
+        'title' => $block->title
+    ]);
+    $this->params['breadcrumbs'][] = ['label' => Yii::t('app/modules/content', 'Content blocks'), 'url' => ['blocks/index']];
+    $this->params['breadcrumbs'][] = ['label' => $block->title, 'url' => ['blocks/update', 'id' => $block->id]];
 }
 
 $this->params['breadcrumbs'][] = Yii::t('app/modules/content', 'Fields list');

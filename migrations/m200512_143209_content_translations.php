@@ -3,9 +3,9 @@
 use yii\db\Migration;
 
 /**
- * Class m200508_231624_content_blocks_translations
+ * Class m200512_143209_content_translations
  */
-class m200508_231624_content_blocks_translations extends Migration
+class m200512_143209_content_translations extends Migration
 {
     /**
      * {@inheritdoc}
@@ -52,16 +52,16 @@ class m200508_231624_content_blocks_translations extends Migration
             }
         }
 
-        if (is_null($this->getDb()->getSchema()->getTableSchema('{{%blog_cats}}')->getColumn('source_id'))) {
-            $this->addColumn('{{%blog_cats}}', 'source_id', $this->integer(11)->null()->after('id'));
+        if (is_null($this->getDb()->getSchema()->getTableSchema('{{%content_fields}}')->getColumn('source_id'))) {
+            $this->addColumn('{{%content_fields}}', 'source_id', $this->integer()->null()->after('id'));
 
             // Setup foreign key to source id
-            $this->createIndex('{{%idx-blog-cats-source}}', '{{%blog_cats}}', ['source_id']);
+            $this->createIndex('{{%idx-content-fields-source}}', '{{%content_fields}}', ['source_id']);
             $this->addForeignKey(
-                'fk_blog_cats_to_source',
-                '{{%blog_cats}}',
+                'fk_content_fields_to_source',
+                '{{%content_fields}}',
                 'source_id',
-                '{{%blog_cats}}',
+                '{{%content_fields}}',
                 'id',
                 'NO ACTION',
                 'CASCADE'
@@ -69,16 +69,16 @@ class m200508_231624_content_blocks_translations extends Migration
 
         }
 
-        if (is_null($this->getDb()->getSchema()->getTableSchema('{{%blog_cats}}')->getColumn('locale'))) {
-            $this->addColumn('{{%blog_cats}}', 'locale', $this->string(10)->defaultValue($defaultLocale)->after('keywords'));
-            $this->createIndex('{{%idx-blog-cats-locale}}', '{{%blog_cats}}', ['locale']);
+        if (is_null($this->getDb()->getSchema()->getTableSchema('{{%content_fields}}')->getColumn('locale'))) {
+            $this->addColumn('{{%content_fields}}', 'locale', $this->string(10)->defaultValue($defaultLocale)->after('params'));
+            $this->createIndex('{{%idx-content-fields-locale}}', '{{%content_fields}}', ['locale']);
 
             // If module `Translations` exist setup foreign key `locale` to `trans_langs.locale`
             if (class_exists('\wdmg\translations\models\Languages')) {
                 $langsTable = \wdmg\translations\models\Languages::tableName();
                 $this->addForeignKey(
-                    'fk_blog_cats_to_langs',
-                    '{{%blog_cats}}',
+                    'fk_content_fields_to_langs',
+                    '{{%content_fields}}',
                     'locale',
                     $langsTable,
                     'locale',
@@ -88,33 +88,16 @@ class m200508_231624_content_blocks_translations extends Migration
             }
         }
 
-        if (is_null($this->getDb()->getSchema()->getTableSchema('{{%blog_tags}}')->getColumn('source_id'))) {
-            $this->addColumn('{{%blog_tags}}', 'source_id', $this->integer(11)->null()->after('id'));
-
-            // Setup foreign key to source id
-            $this->createIndex('{{%idx-blog-tags-source}}', '{{%blog_tags}}', ['source_id']);
-            $this->addForeignKey(
-                'fk_blog_tags_to_source',
-                '{{%blog_tags}}',
-                'source_id',
-                '{{%blog_tags}}',
-                'id',
-                'NO ACTION',
-                'CASCADE'
-            );
-
-        }
-
-        if (is_null($this->getDb()->getSchema()->getTableSchema('{{%blog_tags}}')->getColumn('locale'))) {
-            $this->addColumn('{{%blog_tags}}', 'locale', $this->string(10)->defaultValue($defaultLocale)->after('keywords'));
-            $this->createIndex('{{%idx-blog-tags-locale}}', '{{%blog_tags}}', ['locale']);
+        if (is_null($this->getDb()->getSchema()->getTableSchema('{{%content}}')->getColumn('locale'))) {
+            $this->addColumn('{{%content}}', 'locale', $this->string(10)->defaultValue($defaultLocale)->after('content'));
+            $this->createIndex('{{%idx-content-locale}}', '{{%content}}', ['locale']);
 
             // If module `Translations` exist setup foreign key `locale` to `trans_langs.locale`
             if (class_exists('\wdmg\translations\models\Languages')) {
                 $langsTable = \wdmg\translations\models\Languages::tableName();
                 $this->addForeignKey(
-                    'fk_blog_tags_to_langs',
-                    '{{%blog_tags}}',
+                    'fk_content_to_langs',
+                    '{{%content}}',
                     'locale',
                     $langsTable,
                     'locale',
@@ -154,49 +137,40 @@ class m200508_231624_content_blocks_translations extends Migration
             }
         }
 
-        if (!is_null($this->getDb()->getSchema()->getTableSchema('{{%blog_cats}}')->getColumn('source_id'))) {
-            $this->dropIndex('{{%idx-blog-cats-source}}', '{{%blog_cats}}');
-            $this->dropColumn('{{%blog_cats}}', 'source_id');
+        if (!is_null($this->getDb()->getSchema()->getTableSchema('{{%content_fields}}')->getColumn('source_id'))) {
+            $this->dropIndex('{{%idx-content-fields-source}}', '{{%content_fields}}');
+            $this->dropColumn('{{%content_fields}}', 'source_id');
             $this->dropForeignKey(
-                'fk_blog_cats_to_source',
-                '{{%blog_cats}}'
+                'fk_content_fields_to_source',
+                '{{%content_fields}}'
             );
         }
 
-        if (!is_null($this->getDb()->getSchema()->getTableSchema('{{%blog_cats}}')->getColumn('locale'))) {
-            $this->dropIndex('{{%idx-blog-cats-locale}}', '{{%blog_cats}}');
-            $this->dropColumn('{{%blog_cats}}', 'locale');
+        if (!is_null($this->getDb()->getSchema()->getTableSchema('{{%content_fields}}')->getColumn('locale'))) {
+            $this->dropIndex('{{%idx-content-fields-locale}}', '{{%content_fields}}');
+            $this->dropColumn('{{%content_fields}}', 'locale');
 
             if (class_exists('\wdmg\translations\models\Languages')) {
                 $langsTable = \wdmg\translations\models\Languages::tableName();
                 if (!(Yii::$app->db->getTableSchema($langsTable, true) === null)) {
                     $this->dropForeignKey(
-                        'fk_blog_cats_to_langs',
-                        '{{%blog_cats}}'
+                        'fk_content_fields_to_langs',
+                        '{{%content_fields}}'
                     );
                 }
             }
         }
 
-        if (!is_null($this->getDb()->getSchema()->getTableSchema('{{%blog_tags}}')->getColumn('source_id'))) {
-            $this->dropIndex('{{%idx-blog-tags-source}}', '{{%blog_tags}}');
-            $this->dropColumn('{{%blog_tags}}', 'source_id');
-            $this->dropForeignKey(
-                'fk_blog_tags_to_source',
-                '{{%blog_tags}}'
-            );
-        }
-
-        if (!is_null($this->getDb()->getSchema()->getTableSchema('{{%blog_tags}}')->getColumn('locale'))) {
-            $this->dropIndex('{{%idx-blog-tags-locale}}', '{{%blog_tags}}');
-            $this->dropColumn('{{%blog_tags}}', 'locale');
+        if (!is_null($this->getDb()->getSchema()->getTableSchema('{{%content}}')->getColumn('locale'))) {
+            $this->dropIndex('{{%idx-content-locale}}', '{{%content}}');
+            $this->dropColumn('{{%content}}', 'locale');
 
             if (class_exists('\wdmg\translations\models\Languages')) {
                 $langsTable = \wdmg\translations\models\Languages::tableName();
                 if (!(Yii::$app->db->getTableSchema($langsTable, true) === null)) {
                     $this->dropForeignKey(
-                        'fk_blog_tags_to_langs',
-                        '{{%blog_tags}}'
+                        'fk_content_to_langs',
+                        '{{%content}}'
                     );
                 }
             }

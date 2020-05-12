@@ -133,40 +133,42 @@ class ContentController extends Controller
     public function actionCreate($block_id)
     {
         $block = Blocks::findModel(intval($block_id));
-        $fields = Fields::find()->where(['block_id' => $block_id])->orderBy('sort_order')->asArray()->all();
-        $attributes = ArrayHelper::getColumn($fields, 'name');
-        $model = new \wdmg\base\models\DynamicModel($attributes);
 
         // No language is set for this model, we will use the current user language
-        if (is_null($model->locale)) {
-            if (is_null($this->_locale)) {
+        if (is_null($this->_locale)) {
+            $locale = Yii::$app->sourceLanguage;
+            if (!Yii::$app->request->isPost) {
 
-                $model->locale = Yii::$app->sourceLanguage;
-                if (!Yii::$app->request->isPost) {
-
-                    $languages = $model->getLanguagesList(false);
-                    Yii::$app->getSession()->setFlash(
-                        'danger',
-                        Yii::t(
-                            'app/modules/content',
-                            'No display language has been set. Source language will be selected: {language}',
-                            [
-                                'language' => (isset($languages[Yii::$app->sourceLanguage])) ? $languages[Yii::$app->sourceLanguage] : Yii::$app->sourceLanguage
-                            ]
-                        )
-                    );
-                }
-            } else {
-                $model->locale = $this->_locale;
+                $languages = $block->getLanguagesList(false);
+                Yii::$app->getSession()->setFlash(
+                    'danger',
+                    Yii::t(
+                        'app/modules/content',
+                        'No display language has been set. Source language will be selected: {language}',
+                        [
+                            'language' => (isset($languages[Yii::$app->sourceLanguage])) ? $languages[Yii::$app->sourceLanguage] : Yii::$app->sourceLanguage
+                        ]
+                    )
+                );
             }
+        } else {
+            $locale = $this->_locale;
         }
+
+        if ($locale)
+            $fields = Fields::find()->where(['block_id' => $block_id, 'locale' => $locale])->orderBy('sort_order')->asArray()->all();
+        else
+            $fields = Fields::find()->where(['block_id' => $block_id])->orderBy('sort_order')->asArray()->all();
+
+        $attributes = ArrayHelper::getColumn($fields, 'name');
+        $model = new \wdmg\base\models\DynamicModel($attributes);
 
         // Add validation rules according to field types
         foreach ($fields as $field) {
             if ($name = $field['name']) {
 
                 if ($label = $field['label'])
-                    $model->setAttributeLabel([$name => $label]);
+                    $model->setAttributeLabel($name, $label);
 
                 if ($type = $field['type']) {
                     if ($type == "string")
@@ -206,6 +208,7 @@ class ContentController extends Controller
                         $content->block_id = $block_id;
                         $content->field_id = $field_id;
                         $content->content = $attributes[$name];
+                        $content->locale = ($field['locale']) ? $field['locale'] : $locale;
 
                         // Validate the content model
                         if ($content->validate()) {
@@ -304,17 +307,13 @@ class ContentController extends Controller
     public function actionUpdate($block_id, $row_order = null)
     {
         $block = Blocks::findModel(intval($block_id));
-        $fields = Fields::find()->where(['block_id' => $block_id])->orderBy('sort_order')->asArray()->all();
-        $attributes = ArrayHelper::getColumn($fields, 'name');
-        $model = new \wdmg\base\models\DynamicModel($attributes);
 
         // No language is set for this model, we will use the current user language
-        if (is_null($model->locale)) {
-
-            $model->locale = Yii::$app->sourceLanguage;
+        if (is_null($this->_locale)) {
+            $locale = Yii::$app->sourceLanguage;
             if (!Yii::$app->request->isPost) {
 
-                $languages = $model->getLanguagesList(false);
+                $languages = $block->getLanguagesList(false);
                 Yii::$app->getSession()->setFlash(
                     'danger',
                     Yii::t(
@@ -326,14 +325,24 @@ class ContentController extends Controller
                     )
                 );
             }
+        } else {
+            $locale = $this->_locale;
         }
+
+        if ($locale)
+            $fields = Fields::find()->where(['block_id' => $block_id, 'locale' => $locale])->orderBy('sort_order')->asArray()->all();
+        else
+            $fields = Fields::find()->where(['block_id' => $block_id])->orderBy('sort_order')->asArray()->all();
+
+        $attributes = ArrayHelper::getColumn($fields, 'name');
+        $model = new \wdmg\base\models\DynamicModel($attributes);
 
         // Add validation rules according to field types
         foreach ($fields as $field) {
             if ($name = $field['name']) {
 
                 if ($label = $field['label'])
-                    $model->setAttributeLabel([$name => $label]);
+                    $model->setAttributeLabel($name, $label);
 
                 if ($type = $field['type']) {
                     if ($type == "string")
@@ -354,11 +363,19 @@ class ContentController extends Controller
 
         // Load existing content, if any
         if (!is_null($row_order) && $block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
+
             // Content list selection
             if ($items = Items::find()->where(['block_id' => intval($block_id), 'row_order' => intval($row_order)])->asArray()->all()) {
+
                 $ext_id = ArrayHelper::getColumn($items, 'ext_id');
+
+                if ($locale)
+                    $contents = Content::find()->where(['id' => $ext_id, 'block_id' => intval($block_id), 'locale' => $locale])->asArray()->all();
+                else
+                    $contents = Content::find()->where(['id' => $ext_id, 'block_id' => intval($block_id)])->asArray()->all();
+
                 // Selecting a position from the content list
-                if ($contents = Content::find()->where(['id' => $ext_id, 'block_id' => intval($block_id)])->asArray()->all()) {
+                if ($contents) {
                     foreach ($contents as $content) {
                         foreach ($fields as $field) {
                             // If the attribute ID is already in the content table, load the value for the model property
@@ -371,8 +388,14 @@ class ContentController extends Controller
                 }
             }
         } else {
+
+            if ($locale)
+                $contents = Content::find()->where(['block_id' => intval($block_id), 'locale' => $locale])->asArray()->all();
+            else
+                $contents = Content::find()->where(['block_id' => intval($block_id)])->asArray()->all();
+
             // Content block selection
-            if ($contents = Content::find()->where(['block_id' => intval($block_id)])->asArray()->all()) {
+            if ($contents) {
                 foreach ($contents as $content) {
                     foreach ($fields as $field) {
                         // If the attribute ID is already in the content table, load the value for the model property
@@ -403,6 +426,7 @@ class ContentController extends Controller
                         $content->block_id = $block_id;
                         $content->field_id = $field_id;
                         $content->content = $attributes[$name];
+                        $content->locale = ($field['locale']) ? $field['locale'] : $locale;
 
                         // Производим валидацию модели контента
                         if ($content->validate()) {

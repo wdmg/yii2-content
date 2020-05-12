@@ -97,7 +97,7 @@ class BlocksController extends Controller
     public function actionView($id)
     {
         $model = self::findModel($id);
-        $rows = $model->getBlockContent($model->id, true);
+        $rows = $model->getBlockContent($model->id, $this->_locale, true);
         $dataProvider = new \yii\data\ArrayDataProvider([
             'allModels' => $rows,
             'pagination' => [

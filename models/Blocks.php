@@ -39,7 +39,7 @@ class Blocks extends ActiveRecordML
     const CONTENT_BLOCK_TYPE_LIST = 2;
 
     const CONTENT_BLOCK_STATUS_DRAFT = 0;
-    const CONTENT_BLOCK_STATUS_PUBLISHED = 10;
+    const CONTENT_BLOCK_STATUS_PUBLISHED = 1;
 
     /**
      * {@inheritdoc}
@@ -221,24 +221,39 @@ class Blocks extends ActiveRecordML
      * @param bool $asArray
      * @return array|null|ActiveRecord
      */
-    public static function getBlockContent($id = null, $asArray = false) {
+    public static function getBlockContent($id = null, $locale = null, $asArray = false) {
 
         if (!is_integer($id) && !is_string($id))
             return null;
 
         $query = Content::find()->alias('content')
             ->select(['fields.sort_order as field_order', 'fields.name', 'content.content', 'fields.type', 'fields.params'])
-            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id`')
-            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id`');
+            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id` AND `blocks`.`locale` = `content`.`locale`')
+            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id` AND `fields`.`locale` = `content`.`locale`');
 
-        if (is_integer($id))
-            $query->where([
-                'blocks.id' => intval($id)
-            ]);
-        elseif (is_string($id))
-            $query->where([
-                'blocks.alias' => trim($id)
-            ]);
+        if (is_integer($id)) {
+            if (!is_null($locale)) {
+                $query->where([
+                    'blocks.source_id' => intval($id),
+                    'blocks.locale' => trim($locale)
+                ]);
+            } else {
+                $query->where([
+                    'blocks.id' => intval($id)
+                ]);
+            }
+        } elseif (is_string($id)) {
+            if (!is_null($locale)) {
+                $query->where([
+                    'blocks.alias' => trim($id),
+                    'blocks.locale' => trim($locale)
+                ]);
+            } else {
+                $query->where([
+                    'blocks.alias' => trim($id)
+                ]);
+            }
+        }
 
         $query->andWhere([
             'blocks.type' => self::CONTENT_BLOCK_TYPE_ONCE,
@@ -258,25 +273,40 @@ class Blocks extends ActiveRecordML
      * @param bool $asArray
      * @return array|null|ActiveRecord
      */
-    public static function getListContent($id = null, $asArray = false) {
+    public static function getListContent($id = null, $locale = null, $asArray = false) {
 
         if (!is_integer($id) && !is_string($id))
             return null;
 
         $query = Content::find()->alias('content')
             ->select(['items.row_order', 'fields.sort_order as field_order', 'fields.name', 'content.content', 'fields.type', 'fields.params'])
-            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id`')
-            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id`')
+            ->leftJoin(['blocks' => Blocks::tableName()], '`blocks`.`id` = `content`.`block_id` AND `blocks`.`locale` = `content`.`locale`')
+            ->leftJoin(['fields' => Fields::tableName()], '`fields`.`id` = `content`.`field_id` AND `fields`.`locale` = `content`.`locale`')
             ->leftJoin(['items' => Items::tableName()], '`items`.`block_id` = `blocks`.`id` AND `items`.`ext_id` = `content`.`id`');
 
-        if (is_integer($id))
-            $query->where([
-                'blocks.id' => intval($id)
-            ]);
-        elseif (is_string($id))
-            $query->where([
-                'blocks.alias' => trim($id)
-            ]);
+        if (is_integer($id)) {
+            if (!is_null($locale)) {
+                $query->where([
+                    'blocks.source_id' => intval($id),
+                    'blocks.locale' => trim($locale)
+                ]);
+            } else {
+                $query->where([
+                    'blocks.id' => intval($id)
+                ]);
+            }
+        } elseif (is_string($id)) {
+            if (!is_null($locale)) {
+                $query->where([
+                    'blocks.alias' => trim($id),
+                    'blocks.locale' => trim($locale)
+                ]);
+            } else {
+                $query->where([
+                    'blocks.alias' => trim($id)
+                ]);
+            }
+        }
 
         $query->andWhere([
             'blocks.type' => self::CONTENT_BLOCK_TYPE_LIST,

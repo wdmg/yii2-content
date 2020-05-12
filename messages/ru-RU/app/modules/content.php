@@ -79,7 +79,10 @@ return [
 
     'Fields list' => 'Список полей',
     'Fields for: {title}' => 'Поля для: {title}',
+    'Block fields: {title}' => 'Поля блока: {title}',
+    'List fields: {title}' => 'Поля списка: {title}',
     'Add field' => 'Добавить поле',
+    'Add content' => 'Добавить контент',
     'Add new field' => 'Добавить новое поле',
     'Create a field' => 'Создание поля',
     'Field: {label}' => 'Поле: {label}',
