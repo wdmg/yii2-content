@@ -40,9 +40,9 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                 'format' => 'html',
                 'value' => function($data) {
                     if ($data->title & $data->description) {
-                        return '<b>' . $data->title . '</b><br/><span class="text-muted">' . mb_strimwidth(strip_tags($data->description), 0, 64, '…') . '</span>';
+                        return Html::a('<b>' . $data->title . '</b>', Url::toRoute(['content/index', 'block_id' => $data->id])) . '<br/><span class="text-muted">' . mb_strimwidth(strip_tags($data->description), 0, 64, '…') . '</span>';
                     } elseif ($data->title) {
-                        return '<b>' . $data->title . '</b>';
+                        return Html::a('<b>' . $data->title . '</b>', Url::toRoute(['content/index', 'block_id' => $data->id]));
                     } else {
                         return null;
                     }
