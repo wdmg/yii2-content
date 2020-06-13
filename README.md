@@ -4,6 +4,8 @@
 ![Progress](https://img.shields.io/badge/progress-ready_to_use-green.svg)
 [![GitHub license](https://img.shields.io/github/license/wdmg/yii2-content.svg)](https://github.com/wdmg/yii2-content/blob/master/LICENSE)
 
+<img src="./docs/images/yii2-content.png" width="100%" alt="Yii2 Content" />
+
 # Yii2 Content
 Content manager for Yii2.
 The module allows you to create multilingual content blocks, as well as lists that can be displayed in frontend with extension component.
