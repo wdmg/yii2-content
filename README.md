@@ -10,7 +10,7 @@
 Content manager for Yii2.
 The module allows you to create multilingual content blocks, as well as lists that can be displayed in frontend with extension component.
 
-This module is an integral part of the [Butterfly.SMS](https://butterflycms.com/) content management system, but can also be used as an standalone extension.
+This module is an integral part of the [Butterfly.СMS](https://butterflycms.com/) content management system, but can also be used as an standalone extension.
 
 Copyrights (c) 2019-2020 [W.D.M.Group, Ukraine](https://wdmg.com.ua/)
 
