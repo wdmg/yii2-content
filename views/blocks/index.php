@@ -448,6 +448,14 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                         }
                     },
                     'update' => function($url, $data, $key) {
+
+                        if (Yii::$app->authManager && $this->context->module->moduleExist('rbac') && !Yii::$app->user->can('updatePosts', [
+                                'created_by' => $data->created_by,
+                                'updated_by' => $data->updated_by
+                            ])) {
+                            return false;
+                        }
+
                         $output = [];
                         $versions = $data->getAllVersions($data->id, true);
                         $locales = ArrayHelper::map($versions, 'id', 'locale');
@@ -522,6 +530,14 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                         );
                     },
                     'delete' => function($url, $data, $key) {
+
+                        if (Yii::$app->authManager && $this->context->module->moduleExist('rbac') && !Yii::$app->user->can('updatePosts', [
+                                'created_by' => $data->created_by,
+                                'updated_by' => $data->updated_by
+                            ])) {
+                            return false;
+                        }
+
                         $output = [];
                         $versions = $data->getAllVersions($data->id, true);
                         $locales = ArrayHelper::map($versions, 'id', 'locale');
@@ -618,10 +634,10 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
             ],
             'maxButtonCount' => 5,
             'activePageCssClass' => 'active',
-            'prevPageCssClass' => '',
-            'nextPageCssClass' => '',
-            'firstPageCssClass' => 'previous',
-            'lastPageCssClass' => 'next',
+            'prevPageCssClass' => 'prev',
+            'nextPageCssClass' => 'next',
+            'firstPageCssClass' => 'first',
+            'lastPageCssClass' => 'last',
             'firstPageLabel' => Yii::t('app/modules/content', 'First page'),
             'lastPageLabel'  => Yii::t('app/modules/content', 'Last page'),
             'prevPageLabel'  => Yii::t('app/modules/content', '&larr; Prev page'),

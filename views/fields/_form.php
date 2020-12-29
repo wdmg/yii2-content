@@ -44,7 +44,12 @@ use wdmg\widgets\SelectInput;
     <hr/>
     <div class="form-group">
         <?= Html::a(Yii::t('app/modules/content', '&larr; Back to list'), ['fields/index', 'block_id' => $block->id], ['class' => 'btn btn-default pull-left']) ?>
-        <?= Html::submitButton(Yii::t('app/modules/content', 'Save'), ['class' => 'btn btn-save btn-success pull-right']) ?>
+        <?php if ((Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
+                    'created_by' => $model->created_by,
+                    'updated_by' => $model->updated_by
+                ])) || !$model->id) : ?>
+            <?= Html::submitButton(Yii::t('app/modules/content', 'Save'), ['class' => 'btn btn-save btn-success pull-right']) ?>
+        <?php endif; ?>
     </div>
     <?php ActiveForm::end(); ?>
 </div>

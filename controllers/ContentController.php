@@ -65,6 +65,20 @@ class ContentController extends Controller
                     ],
                 ]
             ];
+        } else if ($this->module->moduleExist('admin/rbac')) { // Ok, then we check access according to the rules
+            $behaviors['access'] = [
+                'class' => AccessControl::class,
+                'rules' => [
+                    [
+                        'actions' => ['update', 'create'],
+                        'roles' => ['updatePosts'],
+                        'allow' => true
+                    ], [
+                        'roles' => ['viewDashboard'],
+                        'allow' => true
+                    ],
+                ],
+            ];
         }
 
         return $behaviors;
