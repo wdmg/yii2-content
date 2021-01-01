@@ -83,15 +83,20 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
 
 
                     if ($data->getFieldsCount()) {
-                        $html .= Html::a(
-                            Yii::t('app/modules/content', 'Edit'),
-                            Url::toRoute(['fields/index', 'block_id' => $data->id]),
-                            [
-                                'class' => 'btn btn-link btn-edit btn-sm btn-block',
-                                'title' => Yii::t('app/modules/content', 'Edit fields'),
-                                'data-pjax' => '0'
-                            ]
-                        );
+                        if ((Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
+                            'created_by' => $data->created_by,
+                            'updated_by' => $data->updated_by
+                        ]))) {
+                            $html .= Html::a(
+                                Yii::t('app/modules/content', 'Edit'),
+                                Url::toRoute(['fields/index', 'block_id' => $data->id]),
+                                [
+                                    'class' => 'btn btn-link btn-edit btn-sm btn-block',
+                                    'title' => Yii::t('app/modules/content', 'Edit fields'),
+                                    'data-pjax' => '0'
+                                ]
+                            );
+                        }
                     } else {
                         $html .= Html::a(
                             Yii::t('app/modules/content', 'Add field'),
@@ -114,15 +119,20 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                     $html = '';
 
                     if ($data->getContentCount()) {
-                        $html .= Html::a(
-                            Yii::t('app/modules/content', 'Edit'),
-                            Url::toRoute(['content/index', 'block_id' => $data->id]),
-                            [
-                                'class' => 'btn btn-link btn-edit btn-sm btn-block',
-                                'title' => Yii::t('app/modules/content', 'Edit content'),
-                                'data-pjax' => '0'
-                            ]
-                        );
+                        if ((Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
+                            'created_by' => $data->created_by,
+                            'updated_by' => $data->updated_by
+                        ]))) {
+                            $html .= Html::a(
+                                Yii::t('app/modules/content', 'Edit'),
+                                Url::toRoute(['content/index', 'block_id' => $data->id]),
+                                [
+                                    'class' => 'btn btn-link btn-edit btn-sm btn-block',
+                                    'title' => Yii::t('app/modules/content', 'Edit content'),
+                                    'data-pjax' => '0'
+                                ]
+                            );
+                        }
                         $html .= Html::a(
                             Yii::t('app/modules/content', 'Preview'),
                             Url::toRoute(['lists/view', 'id' => $data->id]),

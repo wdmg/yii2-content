@@ -82,7 +82,25 @@ else
                                 'style' => 'min-width:120px',
                             ],
                             'visibleButtons' => [
-                                'view' => false
+                                'view' => false,
+                                'update' => function($url, $data, $key) use ($block) {
+                                    if ((Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
+                                        'created_by' => $block->created_by,
+                                        'updated_by' => $block->updated_by
+                                    ])))
+                                        return true;
+                                    else
+                                        return false;
+                                },
+                                'delete' => function($url, $data, $key) use ($block) {
+                                    if ((Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
+                                            'created_by' => $block->created_by,
+                                            'updated_by' => $block->updated_by
+                                        ])))
+                                        return true;
+                                    else
+                                        return false;
+                                },
                             ],
                             'urlCreator' => function($action, $model, $key, $index) use ($block, $items) {
 
@@ -157,7 +175,10 @@ else
             echo Html::a(Yii::t('app/modules/content', '&larr; Back to list'), ['blocks/index'], ['class' => 'btn btn-default pull-left']);
         ?>&nbsp;
         <div class="btn-group pull-right">
-            <?php
+        <?php if ((Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
+            'created_by' => $block->created_by,
+            'updated_by' => $block->updated_by
+        ])) || !$block->id) {
             if ($block::CONTENT_BLOCK_TYPE_LIST == $block->type) {
                 echo Html::a(Yii::t('app/modules/content', 'Add new row'), ['content/create', 'block_id' => $block->id], ['class' => 'btn btn-add btn-success']);
             } else {
@@ -171,7 +192,7 @@ else
                 }
                 echo Html::a(Yii::t('app/modules/content', 'Edit content'), ['content/update', 'block_id' => $block->id], ['class' => 'btn btn-edit btn-primary']);
             }
-            ?>
+        } ?>
         </div>
     </div>
     <?php Pjax::end(); ?>

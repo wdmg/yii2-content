@@ -37,9 +37,9 @@ use yii\widgets\ActiveForm;
     <div>
         <?= Html::a(Yii::t('app/modules/content', '&larr; Back to list'), ['content/index', 'block_id' => $block->id], ['class' => 'btn btn-default pull-left']) ?>
         <?php if ((Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
-                    'created_by' => $model->created_by,
-                    'updated_by' => $model->updated_by
-                ])) || !$model->id) : ?>
+                    'created_by' => $block->created_by,
+                    'updated_by' => $block->updated_by
+                ])) || !$block->id) : ?>
             <?= Html::submitButton(Yii::t('app/modules/content', 'Save'), ['class' => 'btn btn-save btn-success pull-right']) ?>
         <?php endif; ?>
     </div>

@@ -409,8 +409,13 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                 echo Html::a(Yii::t('app/modules/content', '&larr; Back to list'), ['fields/index'], ['class' => 'btn btn-default pull-left']);
             else
                 echo Html::a(Yii::t('app/modules/content', '&larr; Back to list'), ['fields/index'], ['class' => 'btn btn-default pull-left']);
-        ?>&nbsp;
-        <?= Html::a(Yii::t('app/modules/content', 'Add new field'), ['fields/create', 'block_id' => $block->id], ['class' => 'btn btn-add btn-success pull-right']) ?>
+        ?>
+        <?php if (Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
+            'created_by' => $block->created_by,
+            'updated_by' => $block->updated_by
+        ])) : ?>
+            <?= Html::a(Yii::t('app/modules/content', 'Add new field'), ['fields/create', 'block_id' => $block->id], ['class' => 'btn btn-add btn-success pull-right']) ?>
+        <?php endif; ?>
     </div>
     <?php Pjax::end(); ?>
 </div>

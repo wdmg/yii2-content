@@ -29,8 +29,8 @@ else
 
 ?>
 <?php if (Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
-        'created_by' => $model->created_by,
-        'updated_by' => $model->updated_by
+        'created_by' => $block->created_by,
+        'updated_by' => $block->updated_by
     ])) : ?>
     <div class="page-header">
         <h1><?= Html::encode($this->title) ?> <small class="text-muted pull-right">[v.<?= $module->version ?>]</small></h1>
