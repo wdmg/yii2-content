@@ -84,22 +84,24 @@ else
                             'visibleButtons' => [
                                 'view' => false,
                                 'update' => function($url, $data, $key) use ($block) {
-                                    if ((Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
-                                        'created_by' => $block->created_by,
-                                        'updated_by' => $block->updated_by
-                                    ])))
-                                        return true;
-                                    else
-                                        return false;
-                                },
-                                'delete' => function($url, $data, $key) use ($block) {
-                                    if ((Yii::$app->authManager && $this->context->module->moduleExist('rbac') && Yii::$app->user->can('updatePosts', [
+                                    if (Yii::$app->authManager && $this->context->module->moduleExist('rbac') && !Yii::$app->user->can('updatePosts', [
                                             'created_by' => $block->created_by,
                                             'updated_by' => $block->updated_by
-                                        ])))
-                                        return true;
-                                    else
+                                        ])) {
                                         return false;
+                                    }
+
+                                    return true;
+                                },
+                                'delete' => function($url, $data, $key) use ($block) {
+                                    if (Yii::$app->authManager && $this->context->module->moduleExist('rbac') && !Yii::$app->user->can('updatePosts', [
+                                            'created_by' => $block->created_by,
+                                            'updated_by' => $block->updated_by
+                                        ])) {
+                                        return false;
+                                    }
+
+                                    return true;
                                 },
                             ],
                             'urlCreator' => function($action, $model, $key, $index) use ($block, $items) {
