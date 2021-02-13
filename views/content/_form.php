@@ -30,7 +30,12 @@ use yii\widgets\ActiveForm;
     <?php
         foreach ($model->getAttributes() as $attribute => $value) {
             $label = $model->getAttributeLabel($attribute);
-            echo $form->field($model, $attribute)->label($label . ' <span class="text-muted">[' .$attribute. ']</span>');
+            echo $form->field($model, $attribute, [
+                'inputOptions' => [
+                    'class' => 'form-control',
+                    'lang' => ($content->locale ?? Yii::$app->language)
+                ]
+            ])->label($label . ' <span class="text-muted">[' .$attribute. ']</span>');
         }
     ?>
     <hr/>

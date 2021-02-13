@@ -29,7 +29,7 @@ use wdmg\widgets\SelectInput;
         'id' => "fieldForm",
         'enableAjaxValidation' => true
     ]); ?>
-    <?= $form->field($model, 'label'); ?>
+    <?= $form->field($model, 'label')->textInput(['lang' => ($model->locale ?? Yii::$app->language)]); ?>
     <?= $form->field($model, 'name')->textInput([
             'disabled' => ($model->source_id) ? true : false,
             'maxlength' => true

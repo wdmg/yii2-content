@@ -109,7 +109,7 @@ class ListsController extends Controller
     public function actionView($id, $locale = null)
     {
         $this->_locale = null;
-        $model = self::findModel($id, $locale);
+        $model = self::findModel($id);
 
         if (is_null($locale))
             $locale = $model->locale;
@@ -130,7 +130,8 @@ class ListsController extends Controller
         return $this->renderAjax('_view', [
             'model' => $model,
             'dataProvider' => $dataProvider,
-            'module' => $this->module
+            'module' => $this->module,
+            'locale' => $locale
         ]);
     }
 

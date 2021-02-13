@@ -30,12 +30,12 @@ use wdmg\widgets\LangSwitcher;
         'id' => "addBlockForm",
         'enableAjaxValidation' => true
     ]); ?>
-    <?= $form->field($model, 'title'); ?>
+    <?= $form->field($model, 'title')->textInput(['lang' => ($model->locale ?? Yii::$app->language)]); ?>
     <?= $form->field($model, 'alias')->textInput([
         'disabled' => ($model->source_id) ? true : false,
         'maxlength' => true
     ]) ?>
-    <?= $form->field($model, 'description')->textarea(['rows' => 2]) ?>
+    <?= $form->field($model, 'description')->textarea(['rows' => 2, 'lang' => ($model->locale ?? Yii::$app->language)]) ?>
     <?= $form->field($model, 'status')->widget(SelectInput::class, [
         'items' => $model->getStatusesList(false),
         'options' => [
