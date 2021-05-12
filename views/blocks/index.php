@@ -126,10 +126,10 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                             Yii::t('app/modules/content', 'Preview'),
                             Url::toRoute(['blocks/view', 'id' => $data->id]),
                             [
-                                'class' => 'btn btn-link btn-view btn-sm btn-block content-preview-link',
+                                'class' => 'btn btn-link btn-view btn-sm btn-block',
                                 'title' => Yii::t('app/modules/content', 'Content preview'),
                                 'data-toggle' => 'modal',
-                                'data-target' => '#contentPreview',
+                                'data-target' => '#contentPreviewModal',
                                 'data-id' => $data->id,
                                 'data-pjax' => '0'
                             ]
@@ -360,10 +360,9 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                                         $output[] = Html::a(Yii::t('app/modules/content','Preview of source version: {language}', [
                                             'language' => $locale['name']
                                         ]), ['blocks/view', 'id' => $data->id], [
-                                            'class' => 'content-preview-link',
                                             'title' => Yii::t('app/modules/content', 'Content preview'),
                                             'data-toggle' => 'modal',
-                                            'data-target' => '#contentPreview',
+                                            'data-target' => '#contentPreviewModal',
                                             'data-id' => $data->id,
                                             'data-pjax' => '0'
                                         ]);
@@ -371,10 +370,9 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                                         $output[] = Html::a(Yii::t('app/modules/content','Preview of language version: {language}', [
                                             'language' => $locale['name']
                                         ]), ['blocks/view', 'id' => $data->id, 'locale' => $locale['locale']], [
-                                            'class' => 'content-preview-link',
                                             'title' => Yii::t('app/modules/content', 'Content preview'),
                                             'data-toggle' => 'modal',
-                                            'data-target' => '#contentPreview',
+                                            'data-target' => '#contentPreviewModal',
                                             'data-id' => $data->id,
                                             'data-pjax' => '0'
                                         ]);
@@ -394,10 +392,9 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                                         $output[] = Html::a(Yii::t('app/modules/content','Preview of version: {language}', [
                                             'language' => $language
                                         ]), ['blocks/view', 'id' => $data->id], [
-                                            'class' => 'content-preview-link',
                                             'title' => Yii::t('app/modules/content', 'Content preview'),
                                             'data-toggle' => 'modal',
-                                            'data-target' => '#contentPreview',
+                                            'data-target' => '#contentPreviewModal',
                                             'data-id' => $data->id,
                                             'data-pjax' => '0'
                                         ]);
@@ -405,10 +402,9 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                                         $output[] = Html::a(Yii::t('app/modules/content','Preview of version: {language}', [
                                             'language' => $language
                                         ]), ['blocks/view', 'id' => $data->id, 'locale' => $locale], [
-                                            'class' => 'content-preview-link',
                                             'title' => Yii::t('app/modules/content', 'Content preview'),
                                             'data-toggle' => 'modal',
-                                            'data-target' => '#contentPreview',
+                                            'data-target' => '#contentPreviewModal',
                                             'data-id' => $data->id,
                                             'data-pjax' => '0'
                                         ]);
@@ -447,10 +443,10 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
                             return Html::a('<span class="glyphicon glyphicon-eye-open"></span> ' .
                                 Yii::t('app/modules/content', 'Preview'),
                                 $url, [
-                                    'class' => 'btn btn-link btn-xs content-preview-link',
+                                    'class' => 'btn btn-link btn-xs',
                                     'title' => Yii::t('app/modules/content', 'Content preview'),
                                     'data-toggle' => 'modal',
-                                    'data-target' => '#contentPreview',
+                                    'data-target' => '#contentPreviewModal',
                                     'data-id' => $key,
                                     'data-pjax' => '0'
                                 ]
@@ -661,14 +657,30 @@ if (isset(Yii::$app->translations) && class_exists('\wdmg\translations\FlagsAsse
     <?php Pjax::end(); ?>
 </div>
 
-<?php $this->registerJs(<<< JS
-    $('body').delegate('.content-preview-link', 'click', function(event) {
+<?php
+$this->registerJs(<<< JS
+    $('body').delegate('[data-toggle="modal"][data-target]', 'click', function(event) {
+        
         event.preventDefault();
+        var target = $(event.target).data('target');
         $.get(
             $(this).attr('href'),
             function (data) {
-                $('#contentPreview .modal-body').html(data);
-                $('#contentPreview').modal();
+                
+                $(target).find('.modal-body').html($(data).remove('.modal-footer'));
+                if ($(data).find('.modal-footer').length > 0) {
+                    $(target).find('.modal-footer').remove();
+                    $(target).find('.modal-content').append($(data).find('.modal-footer'));
+                }
+                
+                if ($(target).find('button[type="submit"]').length > 0 && $(target).find('form').length > 0) {
+                    $(target).find('button[type="submit"]').on('click', function(event) {
+                        event.preventDefault();
+                        $(target).find('form').submit();
+                    });
+                }
+                
+                $(target).modal();
             }  
         );
     });
@@ -676,7 +688,7 @@ JS
 ); ?>
 
 <?php Modal::begin([
-    'id' => 'contentPreview',
+    'id' => 'contentPreviewModal',
     'header' => '<h4 class="modal-title">'.Yii::t('app/modules/content', 'Content preview').'</h4>',
     'clientOptions' => [
         'show' => false

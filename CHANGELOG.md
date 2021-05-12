@@ -2,6 +2,7 @@ Changelog
 =========
 
 ## 1.1.*
+ * Show modal call fixed
  * Lang attribute for HTML tags and inputs
  
 ## 1.1.2 (2020-12-29)
