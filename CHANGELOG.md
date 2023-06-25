@@ -1,7 +1,8 @@
 Changelog
 =========
 
-## 1.1.*
+## 1.2.0 (2023-06-25)
+ * Update copyrights, fix nav menu for dashboard
  * Show modal call fixed
  * Lang attribute for HTML tags and inputs
  

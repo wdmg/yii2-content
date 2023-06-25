@@ -116,11 +116,6 @@ Use the `Module::dashboardNavItems()` method of the module to generate a navigat
     ?>
 
 # Status and version [ready to use]
+* v.1.2.0 - Update copyrights, fix nav menu for dashboard
 * v.1.1.2 - RBAC implementation
 * v.1.1.1 - Update README.md
-* v.1.1.0 - Multi-language support
-* v.1.0.4 - Change namespace of DynamicModel
-* v.1.0.3 - Log activity
-* v.1.0.2 - Added pagination, up to date dependencies
-* v.1.0.1 - CRUD for blocks, content and fields
-* v.1.0.0 - Added content component and preview of content blocks/lists
